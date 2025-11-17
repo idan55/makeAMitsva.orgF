@@ -1,0 +1,184 @@
+/* Reset minimal */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styling */
+html, body, #root {
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* Page container */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 100% de la fenêtre */
+}
+
+/* Header */
+/* Header (Remplacer ou Modifier le sélecteur existant) */
+header {
+  width: 100%;
+  padding: 25px 30px; /* Ajuster le padding pour l'esthétique */
+  background: white;
+  
+  /* 👇 MODIFICATION CLÉ : Aligner le contenu à gauche */
+  display: flex;
+  justify-content: flex-start; /* Aligne le contenu au début */
+  align-items: center; /* Centrage vertical */
+  gap: 30px; /* Réduire le gap pour l'espace entre le titre et les liens */
+  
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.navigation-links { 
+  /* 🆕 AJOUT : Conteneur pour les NavLinks si on utilise space-between */
+  display: flex;
+  gap: 25px; /* Augmenter l'espace entre les liens (Home, Sign In) */
+}
+
+/* 🆕 AJOUT : Styling du nom GeoTalent */
+header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #007bff; /* Utiliser la couleur de marque de vos liens pour cohérence */
+    margin-right: 40px; /* Ajoute de l'espace net après le titre */
+}
+
+/* Links (Laisser tel quel, mais fonctionne mieux avec les modifications ci-dessus) */
+header a {
+  text-decoration: none;
+  color: #444;
+  font-size: 18px;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+/* ... le reste de vos styles de liens */
+
+header a:hover {
+  color: #007bff;
+  transform: scale(1.05);
+}
+
+header a.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 3px;
+}
+
+/* Content */
+.content {
+  flex: 1; /* prend tout l’espace restant */
+  padding: 30px;
+}
+
+/* Footer */
+.site-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-text {
+  font-size: 14px;
+  color: #555;
+}
+/* Modification du conteneur de page */
+.content {
+  flex: 1; /* Prend tout l'espace vertical restant */
+  padding: 30px;
+  
+  /* 👇 LES LIGNES CLÉS POUR LE CENTRAGE HORIZONTAL ET VERTICAL */
+  display: flex;
+  justify-content: center; /* Centre le contenu horizontalement */
+  align-items: center;     /* Centre le contenu verticalement */
+  
+  /* Assure que le conteneur prend toute la largeur */
+  width: 100%; 
+}
+/* Style du conteneur du formulaire */
+.sign-in-form {
+  display: flex;
+  flex-direction: column; /* Empile les éléments verticalement */
+  
+  width: 400px; /* Largeur fixe pour un aspect net */
+  max-width: 90%; /* Assure la réactivité */
+  
+  padding: 40px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Belle ombre */
+}
+
+/* Titre du formulaire */
+.sign-in-form h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #007bff; /* Couleur de marque */
+  font-size: 1.8em;
+}
+
+/* Style des Labels et Inputs */
+.sign-in-form label {
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.sign-in-form input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1em;
+  margin-bottom: 20px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.sign-in-form input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  outline: none;
+}
+
+.submit-button {
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+/* MapComponent.css */
+
+.map-container-style {
+  /* La carte prend 100% de la largeur du conteneur parent */
+  width: 100%; 
+  /* Définissez une hauteur pour que la carte soit visible */
+  height: 600px; 
+  /* Optionnel : style pour qu'elle corresponde au design GeoTalent */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
