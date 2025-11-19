@@ -8,7 +8,7 @@ function SignIn() {
   
   
 
-  // ---- Fonction de vérification ----
+
   const validatePassword = (value) => {
     if (value.length < 8) {
       return "it needs at least 8 characters.";
@@ -22,7 +22,7 @@ function SignIn() {
     if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) {
       return "  it needs at least one special character.";
     }
-    return ""; // OK
+    return "";
   };
 
   const handlePassChange = (e) => {

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import Map from '../components/Map';
+import Window from '../components/Window';
+
 function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,20 +30,34 @@ function Home() {
 
   return (
     <div className="page-container">
+      
       <Header />
 
       <div className="content">
+
         {loading && <p>Chargement...</p>}
         {error && <p>Erreur : {error}</p>}
 
+        {/* ---- CARTE + WINDOW côte à côte ---- */}
         {data.length > 0 && (
-          <>
-            <Map markers={data} />
-          </>
+          <div className="map-window-wrapper">
+
+            {/* Carte */}
+            <div className="map-wrapper">
+              <Map markers={data} />
+            </div>
+
+            {/* To Do Window */}
+            <div className="window-wrapper">
+              <Window />
+            </div>
+
+          </div>
         )}
       </div>
 
       <Footer />
+
     </div>
   );
 }
