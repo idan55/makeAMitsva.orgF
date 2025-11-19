@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import MyMap from '../components/Mymapp';
-
+import Map from '../components/Map';
 function Home() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,16 +36,7 @@ function Home() {
 
         {data.length > 0 && (
           <>
-            <ul>
-              {data.map((item, index) => (
-                <li key={index}>
-                  {item.properties?.name || "Pas de nom"}
-                </li>
-              ))}
-            </ul>
-
-            {/* Passer les données au composant Map */}
-            <MyMap markers={data} />
+            <Map markers={data} />
           </>
         )}
       </div>
