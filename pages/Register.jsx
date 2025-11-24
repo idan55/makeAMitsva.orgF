@@ -125,15 +125,15 @@ function Register() {
             Create your account
           </button>
           {feedback && (
-  <p
-    style={{
-      color: feedbackType === "error" ? "red" : "green",
-      marginTop: "10px",
-    }}
-  >
-    {feedback}
-  </p>
-)}
+            <p
+              style={{
+                color: feedbackType === "error" ? "red" : "green",
+                marginTop: "10px",
+              }}
+            >
+              {feedback}
+            </p>
+          )}
         </form>
       </div>
       <Footer />
