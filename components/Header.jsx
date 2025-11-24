@@ -8,6 +8,9 @@ function Header() {
     <NavLink to="/">
         Home Page
     </NavLink>
+    <NavLink to="/login">
+        Login
+    </NavLink>
     <NavLink to="/register">
         Register
     </NavLink>
