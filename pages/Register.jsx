@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
+import React, { useState } from "react";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { registerUser } from "../api/api";
 
-function SignIn() {
-
+function Register() {
   // States pour les inputs
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -63,23 +62,22 @@ function SignIn() {
     <div className="page-container">
       <Header />
       <div className="content">
-
         <form className="sign-in-form" onSubmit={handleSubmit}>
           <h1>Register to Make A Mitsva</h1>
 
           <label htmlFor="username">Name:</label>
-          <input 
-            id="username" 
-            type="text" 
+          <input
+            id="username"
+            type="text"
             placeholder="Enter your user name"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
 
           <label htmlFor="email">E-Mail:</label>
-          <input 
-            id="email" 
-            type="email" 
+          <input
+            id="email"
+            type="email"
             placeholder="Enter your mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -94,28 +92,29 @@ function SignIn() {
             onChange={handlePassChange}
           />
 
-          {error && (
-            <p style={{ color: "red", fontSize: "14px" }}>{error}</p>
-          )}
+          {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
 
           <label htmlFor="tel">Telephone:</label>
-          <input 
-            id="tel" 
-            type="tel" 
+          <input
+            id="tel"
+            type="tel"
             placeholder="Enter your telephone number"
             value={tel}
             onChange={(e) => setTel(e.target.value)}
           />
 
-          <button type="submit" className="submit-button" disabled={error !== ""}>
+          <button
+            type="submit"
+            className="submit-button"
+            disabled={error !== ""}
+          >
             Create your account
           </button>
         </form>
-
       </div>
       <Footer />
     </div>
   );
 }
 
-export default SignIn;
+export default Register;
