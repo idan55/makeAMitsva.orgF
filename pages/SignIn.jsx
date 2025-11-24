@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { registerUser } from "../api/api";
 
 function SignIn() {
-  const [pass, setPass] = useState("");
-  const [error, setError] = useState("");
-  
-  
 
+  // States pour les inputs
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [tel, setTel] = useState("");
+  const [password, setPassword] = useState("");
+
+  // States pour le contrôle du password
+  const [error, setError] = useState("");
 
   const validatePassword = (value) => {
     if (value.length < 8) {
@@ -20,20 +25,21 @@ function SignIn() {
       return "it needs at least one number.";
     }
     if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) {
-      return "  it needs at least one special character.";
+      return "it needs at least one special character.";
     }
     return "";
   };
 
   const handlePassChange = (e) => {
     const value = e.target.value;
-    setPass(value);
+    setPassword(value);
 
     const message = validatePassword(value);
     setError(message);
   };
 
-  const handleSubmit = (e) => {
+  // === HANDLE SUBMIT BACKEND ===
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (error !== "") {
@@ -41,8 +47,17 @@ function SignIn() {
       return;
     }
 
-    alert("Formulaire envoyé !");
-  };
+    const data = { username, email, password, tel };
+
+    try {
+      const response = await registerUser(data);
+      console.log("Backend response:", response);
+      alert("Compte créé !");
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors du register");
+    }
+  }
 
   return (
     <div className="page-container">
@@ -52,17 +67,30 @@ function SignIn() {
         <form className="sign-in-form" onSubmit={handleSubmit}>
           <h1>Register to Make A Mitsva</h1>
 
-          <label htmlFor="username"> Name: </label>
-          <input id="username" type="text" placeholder="Enter your user name" />
+          <label htmlFor="username">Name:</label>
+          <input 
+            id="username" 
+            type="text" 
+            placeholder="Enter your user name"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-          <label htmlFor="email">E-Mail: </label>
-          <input id="email" type="email" placeholder="Enter your mail" />
+          <label htmlFor="email">E-Mail:</label>
+          <input 
+            id="email" 
+            type="email" 
+            placeholder="Enter your mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <label htmlFor="password">Password: </label>
+          <label htmlFor="password">Password:</label>
           <input
             id="password"
             type="password"
             placeholder="Enter your password"
+            value={password}
             onChange={handlePassChange}
           />
 
@@ -70,11 +98,17 @@ function SignIn() {
             <p style={{ color: "red", fontSize: "14px" }}>{error}</p>
           )}
 
-          <label htmlFor="tel">Telephone: </label>
-          <input id="tel" type="tel" placeholder="Enter your telephone number" />
+          <label htmlFor="tel">Telephone:</label>
+          <input 
+            id="tel" 
+            type="tel" 
+            placeholder="Enter your telephone number"
+            value={tel}
+            onChange={(e) => setTel(e.target.value)}
+          />
 
           <button type="submit" className="submit-button" disabled={error !== ""}>
-            Se connecter
+            Create your account
           </button>
         </form>
 
