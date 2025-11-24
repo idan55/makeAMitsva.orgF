@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { registerUser } from "../api/api";
+import { registerUser } from "../src/Api";
 
 function Register() {
   // States pour les inputs
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [tel, setTel] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [age, setAge] = useState("");
 
   // States pour le contrôle du password
   const [error, setError] = useState("");
@@ -46,7 +47,7 @@ function Register() {
       return;
     }
 
-    const data = { username, email, password, tel };
+    const data = { name, age, email, password, phone };
 
     try {
       const response = await registerUser(data);
@@ -70,10 +71,18 @@ function Register() {
             id="name"
             type="text"
             placeholder="Enter your user name"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
-
+          <label htmlFor="age">Age:</label>
+          <input
+            type="number"
+            placeholder="Enter your age"
+            value={age}
+            min={16}
+            max={120}
+            onChange={(e) => setAge(e.target.value)}
+          />
           <label htmlFor="email">E-Mail:</label>
           <input
             id="email"
@@ -94,13 +103,13 @@ function Register() {
 
           {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
 
-          <label htmlFor="phone">Telephone:</label>
+          <label htmlFor="phone">phone:</label>
           <input
             id="phone"
             type="phone"
-            placeholder="Enter your telephone number"
-            value={tel}
-            onChange={(e) => setTel(e.target.value)}
+            placeholder="Enter your phoneephone number"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
           />
           <button
             type="submit"
