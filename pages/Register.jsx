@@ -65,9 +65,9 @@ function Register() {
         <form className="sign-in-form" onSubmit={handleSubmit}>
           <h1>Register to Make A Mitsva</h1>
 
-          <label htmlFor="username">Name:</label>
+          <label htmlFor="name">Name:</label>
           <input
-            id="username"
+            id="name"
             type="text"
             placeholder="Enter your user name"
             value={username}
@@ -94,15 +94,14 @@ function Register() {
 
           {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
 
-          <label htmlFor="tel">Telephone:</label>
+          <label htmlFor="phone">Telephone:</label>
           <input
-            id="tel"
-            type="tel"
+            id="phone"
+            type="phone"
             placeholder="Enter your telephone number"
             value={tel}
             onChange={(e) => setTel(e.target.value)}
           />
-
           <button
             type="submit"
             className="submit-button"
