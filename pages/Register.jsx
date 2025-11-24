@@ -10,6 +10,8 @@ function Register() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [age, setAge] = useState("");
+  const [feedback, setFeedback] = useState(""); // message text
+  const [feedbackType, setFeedbackType] = useState(""); // "success" or "error"
 
   // States pour le contrôle du password
   const [error, setError] = useState("");
@@ -37,13 +39,12 @@ function Register() {
     const message = validatePassword(value);
     setError(message);
   };
-
-  // === HANDLE SUBMIT BACKEND ===
   async function handleSubmit(e) {
     e.preventDefault();
 
     if (error !== "") {
-      alert("Le mot de passe n'est pas valide");
+      setFeedback("Password is not valid");
+      setFeedbackType("error");
       return;
     }
 
@@ -51,11 +52,16 @@ function Register() {
 
     try {
       const response = await registerUser(data);
+
+      // response.message comes from backend: "registration completed"
+      setFeedback(response.message || "Account created!");
+      setFeedbackType("success");
       console.log("Backend response:", response);
-      alert("Compte créé !");
     } catch (err) {
       console.error(err);
-      alert("Erreur lors du register");
+      // err.message is whatever backend sent in data.error
+      setFeedback(err.message);
+      setFeedbackType("error");
     }
   }
 
@@ -118,6 +124,16 @@ function Register() {
           >
             Create your account
           </button>
+          {feedback && (
+  <p
+    style={{
+      color: feedbackType === "error" ? "red" : "green",
+      marginTop: "10px",
+    }}
+  >
+    {feedback}
+  </p>
+)}
         </form>
       </div>
       <Footer />
