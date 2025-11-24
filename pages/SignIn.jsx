@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { registerUser } from "../api/api";
+import { registerUser } from "../src/Api";
 
 function SignIn() {
 
@@ -10,7 +10,7 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [tel, setTel] = useState("");
   const [password, setPassword] = useState("");
-
+const [age, setAge] = useState("");
   // States pour le contrôle du password
   const [error, setError] = useState("");
 
@@ -47,7 +47,7 @@ function SignIn() {
       return;
     }
 
-    const data = { username, email, password, tel };
+    const data = { username, email, password, tel, age };
 
     try {
       const response = await registerUser(data);
@@ -75,6 +75,14 @@ function SignIn() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
+          <label htmlFor="age">Age:</label>
+          <input type="number"
+          placeholder='Enter your age'
+          value={age}
+          min={16}
+          max={120}
+          onChange={(e) => setAge(e.target.value)}
+           />
 
           <label htmlFor="email">E-Mail:</label>
           <input 
