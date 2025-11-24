@@ -113,7 +113,7 @@ function Register() {
           <input
             id="phone"
             type="phone"
-            placeholder="Enter your phoneephone number"
+            placeholder="Enter your phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
