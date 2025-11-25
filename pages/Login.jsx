@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { LoginUser } from '../src/Api'; 
-import { useContext } from "react";
 import { AuthContext } from "../src/Authcontext";
+import { useNavigate } from "react-router-dom"; // Import pour la redirection
 
 import '../src/App.css';
 
@@ -12,29 +12,29 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-const [message, setMessage] = useState('');
-  // Fonction qui s’exécute quand le formulaire est soumis
+  const [message, setMessage] = useState('');
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate(); // Hook pour rediriger
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    const data = await LoginUser({ email, password });
+    try {
+      const data = await LoginUser({ email, password });
 
-    // met l'utilisateur dans le contexte !
-    login(data.user);
+      // met l'utilisateur dans le contexte !
+      login(data.user);
 
-    setMessage("Utilisateur connecté");
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setMessage("Utilisateur connecté");
+      navigate('/'); // Redirige vers la page d'accueil
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="page-container">
@@ -48,7 +48,7 @@ const handleSubmit = async (e) => {
 
           <label htmlFor="email">E-mail</label>
           <input
-          placeholder='Enter your email'
+            placeholder='Enter your email'
             type="email"
             id="email"
             name="email"
@@ -59,7 +59,7 @@ const handleSubmit = async (e) => {
 
           <label htmlFor="password">Password</label>
           <input
-          placeholder='Enter your password'
+            placeholder='Enter your password'
             type="password"
             id="password"
             name="password"
@@ -71,7 +71,7 @@ const handleSubmit = async (e) => {
           <button type="submit" className="submit-button" disabled={loading}>
             {loading ? "Connexion..." : "Login"}
           </button>
-            {message && <p style={{ color: 'green' }}>{message}</p>}
+          {message && <p style={{ color: 'green' }}>{message}</p>}
         </form>
       </div>
 
