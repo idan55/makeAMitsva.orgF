@@ -14,7 +14,7 @@ function Header() {
       {user ? (
         <>
           <NavLink to="/myaccount">My Account</NavLink>
-          <button onClick={logout} style={{ marginLeft: "20px" }}>
+          <button onClick={logout} style={{ marginLeft: "500px" }} className="logout-button">
             Logout
           </button>
         </>
