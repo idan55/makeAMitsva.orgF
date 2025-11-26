@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { LoginUser } from "../src/Api";
@@ -14,6 +15,7 @@ function Login() {
   const [message, setMessage] = useState("");
 
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,9 +25,9 @@ function Login() {
 
     try {
       const data = await LoginUser({ email, password });
-      // data = { message, token, user }
-      login(data); // VERY IMPORTANT: pass the whole data object, not data.user
-      setMessage("Utilisateur connecté");
+      login(data); // Save user in context
+      setMessage("Logged in successfully");
+      navigate("/"); // Redirect to homepage
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {

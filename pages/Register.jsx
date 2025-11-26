@@ -14,7 +14,7 @@ function Register() {
   const [feedback, setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
   const [error, setError] = useState("");
-  
+
   const navigate = useNavigate();
   const { login } = useAuth(); // ✅ Récupère la fonction login du contexte
 
@@ -22,7 +22,8 @@ function Register() {
     if (value.length < 8) return "it needs at least 8 characters.";
     if (!/[A-Z]/.test(value)) return "it needs at least one uppercase letter.";
     if (!/[0-9]/.test(value)) return "it needs at least one number.";
-    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) return "it needs at least one special character.";
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value))
+      return "it needs at least one special character.";
     return "";
   };
 
@@ -35,33 +36,30 @@ function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-  
+
     if (error !== "") {
       setFeedback("Password is not valid");
       setFeedbackType("error");
       return;
     }
-  
+
     const data = { name, age, email, password, phone };
-  
+
     try {
-      // 1️⃣ Créer le compte
-      await registerUser(data);
-  
-      // 2️⃣ Connecter automatiquement (EXACTEMENT comme Login)
+      // Register the user
+      const registerData = await registerUser(data);
+
+      // Automatically log in the user after registration
       const loginData = await LoginUser({ email, password });
-      
-      // 3️⃣ Sauvegarder dans le contexte (EXACTEMENT comme Login)
-      login(loginData.user);
-  
+      login(loginData); // Save user in context
+
       setFeedback("Account created and logged in!");
       setFeedbackType("success");
-  
-      // 4️⃣ Rediriger (EXACTEMENT comme Login)
+
+      // Redirect to homepage
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 1000);
-  
     } catch (err) {
       console.error(err);
       setFeedback(err.message || "An error occurred");
