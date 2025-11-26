@@ -1,5 +1,7 @@
-import { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useContext } from 'react';
 
+
+// 1️⃣ Créer le contexte
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -28,6 +30,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    console.log('Logout called'); // ✅ Debug
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -38,4 +41,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};

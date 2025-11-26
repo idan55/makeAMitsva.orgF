@@ -1,66 +1,70 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { registerUser } from "../src/Api";
+import { registerUser, LoginUser } from "../src/Api"; // ✅ Importe LoginUser
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../src/Authcontext"; // ✅ Importe le contexte
 
 function Register() {
-  // States pour les inputs
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [age, setAge] = useState("");
-  const [feedback, setFeedback] = useState(""); // message text
-  const [feedbackType, setFeedbackType] = useState(""); // "success" or "error"
-
-  // States pour le contrôle du password
+  const [feedback, setFeedback] = useState("");
+  const [feedbackType, setFeedbackType] = useState("");
   const [error, setError] = useState("");
+  
+  const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ Récupère la fonction login du contexte
 
   const validatePassword = (value) => {
-    if (value.length < 8) {
-      return "it needs at least 8 characters.";
-    }
-    if (!/[A-Z]/.test(value)) {
-      return "it needs at least one uppercase letter.";
-    }
-    if (!/[0-9]/.test(value)) {
-      return "it needs at least one number.";
-    }
-    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) {
-      return "it needs at least one special character.";
-    }
+    if (value.length < 8) return "it needs at least 8 characters.";
+    if (!/[A-Z]/.test(value)) return "it needs at least one uppercase letter.";
+    if (!/[0-9]/.test(value)) return "it needs at least one number.";
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) return "it needs at least one special character.";
     return "";
   };
 
   const handlePassChange = (e) => {
     const value = e.target.value;
     setPassword(value);
-
     const message = validatePassword(value);
     setError(message);
   };
+
   async function handleSubmit(e) {
     e.preventDefault();
-
+  
     if (error !== "") {
       setFeedback("Password is not valid");
       setFeedbackType("error");
       return;
     }
-
+  
     const data = { name, age, email, password, phone };
-
+  
     try {
-      const response = await registerUser(data);
-
-      // response.message comes from backend: "registration completed"
-      setFeedback(response.message || "Account created!");
+      // 1️⃣ Créer le compte
+      await registerUser(data);
+  
+      // 2️⃣ Connecter automatiquement (EXACTEMENT comme Login)
+      const loginData = await LoginUser({ email, password });
+      
+      // 3️⃣ Sauvegarder dans le contexte (EXACTEMENT comme Login)
+      login(loginData.user);
+  
+      setFeedback("Account created and logged in!");
       setFeedbackType("success");
-      console.log("Backend response:", response);
+  
+      // 4️⃣ Rediriger (EXACTEMENT comme Login)
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+  
     } catch (err) {
       console.error(err);
-      // err.message is whatever backend sent in data.error
-      setFeedback(err.message);
+      setFeedback(err.message || "An error occurred");
       setFeedbackType("error");
     }
   }
@@ -79,16 +83,21 @@ function Register() {
             placeholder="Enter your user name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
+
           <label htmlFor="age">Age:</label>
           <input
+            id="age"
             type="number"
             placeholder="Enter your age"
             value={age}
             min={16}
             max={120}
             onChange={(e) => setAge(e.target.value)}
+            required
           />
+
           <label htmlFor="email">E-Mail:</label>
           <input
             id="email"
@@ -96,6 +105,7 @@ function Register() {
             placeholder="Enter your mail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <label htmlFor="password">Password:</label>
@@ -105,18 +115,21 @@ function Register() {
             placeholder="Enter your password"
             value={password}
             onChange={handlePassChange}
+            required
           />
 
           {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
 
-          <label htmlFor="phone">phone:</label>
+          <label htmlFor="phone">Phone:</label>
           <input
             id="phone"
-            type="phone"
+            type="tel"
             placeholder="Enter your phone number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            required
           />
+
           <button
             type="submit"
             className="submit-button"
@@ -124,6 +137,7 @@ function Register() {
           >
             Create your account
           </button>
+
           {feedback && (
             <p
               style={{
