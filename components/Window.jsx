@@ -1,22 +1,41 @@
+import React from "react";
+
 function Window() {
-    return (
+  return (
+    <div>
+      <h3>Mitsvas to do!</h3>
+
       <div>
-        <h3>Mitsvas to do!</h3>
-  
-        <div>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-          <label><input type="checkbox" /> Help someone</label>
-        </div>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
+        <label>
+          <input type="checkbox" /> Help someone
+        </label>
       </div>
-    );
-  }
-  
-  export default Window;
-  
+    </div>
+  );
+}
+
+export default Window;

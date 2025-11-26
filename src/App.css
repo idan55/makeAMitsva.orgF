@@ -1,274 +1,267 @@
-/* Reset minimal */
-* {
+/* ===== Global layout ===== */
+
+body {
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f3f4f6;
+  color: #111827;
 }
 
-/* Body styling */
-html, body, #root {
-  height: 100%;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Page container */
 .page-container {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* 100% de la fenêtre */
 }
 
-/* Header */
-/* Header (Remplacer ou Modifier le sélecteur existant) */
+/* ===== Header / Footer ===== */
+
 header {
-  width: 100%;
-  padding: 25px 30px; /* Ajuster le padding pour l'esthétique */
-  background: white;
-  
-  /* 👇 MODIFICATION CLÉ : Aligner le contenu à gauche */
+  background: #111827;
+  color: #f9fafb;
+  padding: 16px 24px;
   display: flex;
-  justify-content: flex-start; /* Aligne le contenu au début */
-  align-items: center; /* Centrage vertical */
-  gap: 30px; /* Réduire le gap pour l'espace entre le titre et les liens */
-  
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-.navigation-links { 
-  /* 🆕 AJOUT : Conteneur pour les NavLinks si on utilise space-between */
-  display: flex;
-  gap: 25px; /* Augmenter l'espace entre les liens (Home, Sign In) */
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
-/* 🆕 AJOUT : Styling du nom GeoTalent */
 header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #007bff; /* Utiliser la couleur de marque de vos liens pour cohérence */
-    margin-right: 40px; /* Ajoute de l'espace net après le titre */
-}
-
-/* Links (Laisser tel quel, mais fonctionne mieux avec les modifications ci-dessus) */
-header a {
-  text-decoration: none;
-  color: #444;
-  font-size: 18px;
+  margin: 0;
+  font-size: 1.4rem;
   font-weight: 600;
-  transition: 0.2s ease;
 }
-/* ... le reste de vos styles de liens */
 
-header a:hover {
-  color: #007bff;
-  transform: scale(1.05);
+header a {
+  color: #e5e7eb;
+  text-decoration: none;
+  margin-right: 12px;
+  font-size: 0.95rem;
 }
 
 header a.active {
-  color: #007bff;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 3px;
-}
-
-/* Content */
-.content {
-  flex: 1; /* prend tout l’espace restant */
-  padding: 30px;
-}
-
-/* Footer */
-.site-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-  width: 100%;
-}
-
-.social-icons {
-  display: flex;
-  gap: 15px;
-}
-
-.footer-text {
-  font-size: 14px;
-  color: #555;
-}
-/* Modification du conteneur de page */
-.content {
-  flex: 1; /* Prend tout l'espace vertical restant */
-  padding: 30px;
-  
-  /* 👇 LES LIGNES CLÉS POUR LE CENTRAGE HORIZONTAL ET VERTICAL */
-  display: flex;
-  justify-content: center; /* Centre le contenu horizontalement */
-  align-items: center;     /* Centre le contenu verticalement */
-  
-  /* Assure que le conteneur prend toute la largeur */
-  width: 100%; 
-}
-/* Style du conteneur du formulaire */
-.sign-in-form {
-  display: flex;
-  flex-direction: column; /* Empile les éléments verticalement */
-  
-  width: 400px; /* Largeur fixe pour un aspect net */
-  max-width: 90%; /* Assure la réactivité */
-  
-  padding: 40px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Belle ombre */
-}
-
-/* Titre du formulaire */
-.sign-in-form h1 {
-  text-align: center;
-  margin-bottom: 30px;
-  color: #007bff; /* Couleur de marque */
-  font-size: 1.8em;
-}
-
-/* Style des Labels et Inputs */
-.sign-in-form label {
+  color: #fbbf24;
   font-weight: 600;
-  color: #555;
-  margin-bottom: 5px;
-  display: block;
 }
 
-.sign-in-form input {
-  padding: 12px;
-  border: 1px solid #ddd;
+header a:hover {
+  color: #fbbf24;
+}
+
+.site-footer {
+  margin-top: auto;
+  padding: 16px 24px;
+  background: #111827;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== Main content ===== */
+
+.content {
+  padding: 24px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.content h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+/* ===== Slider + form ===== */
+
+input[type="range"] {
+  width: 220px;
+  margin-left: 12px;
+}
+
+form {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+form h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="tel"],
+form input[type="number"],
+form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin: 6px 0 12px 0;
   border-radius: 6px;
-  font-size: 1em;
-  margin-bottom: 20px;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  border: 1px solid #d1d5db;
+  font-size: 0.95rem;
+  box-sizing: border-box;
 }
 
-.sign-in-form input:focus {
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-  outline: none;
+form textarea {
+  min-height: 70px;
+  resize: vertical;
 }
 
-.submit-button {
-  padding: 12px 20px;
-  background-color: #007bff;
-  color: white;
-  font-weight: 700;
+form button[type="submit"],
+button {
   border: none;
-  border-radius: 6px;
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: #2563eb;
+  color: #f9fafb;
+  font-size: 0.95rem;
   cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.3s, transform 0.1s;
+  transition: background 0.15s ease, transform 0.05s ease;
 }
 
-.submit-button:hover {
-  background-color: #0056b3;
+form button[type="submit"]:hover,
+button:hover {
+  background: #1d4ed8;
   transform: translateY(-1px);
 }
-/* MapComponent.css */
+
+form button[type="submit"]:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ===== Map + right panel ===== */
+
+.map-window-wrapper {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* left: map */
+.map-wrapper {
+  flex: 2;
+  min-height: 380px;
+}
+
+/* right: requests list */
+.window-wrapper {
+  flex: 1.2;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 12px 12px 8px 12px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.window-wrapper h3 {
+  margin: 4px 0 8px 0;
+}
+
+/* scroll area */
+.request-list {
+  margin-top: 4px;
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* ===== Individual request cards ===== */
+
+.request-item {
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.request-item:hover {
+  background: #eef2ff;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+  transform: translateY(-1px);
+}
+
+.request-item strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.98rem;
+}
+
+.request-item div {
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.request-item hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 8px 0;
+}
+
+.request-item p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+/* chat button inside expanded card */
+.request-item button {
+  font-size: 0.85rem;
+  padding: 6px 14px;
+}
+
+/* ===== Map container ===== */
 
 .map-container-style {
   width: 100%;
-  height: 80vh;   /* remplit environ tout l’écran */
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  height: 100%;
 }
 
 .map-full {
   width: 100%;
   height: 100%;
-}
-
-/* ====== LAYOUT MAP + WINDOW ====== */
-
-.map-window-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 25px;
-  width: 100%;
-  margin-top: 20px;
-}
-
-/* La carte prend plus de place */
-/* La carte = 75% */
-.map-wrapper {
-  flex: 3;
-  width: 75%;
-}
-
-/* La To-Do = 25% */
-.window-wrapper {
-  flex: 1;
-  width: 25%;
-  min-width: 250px; /* Garantit beauté même sur petits écrans */
-
-  background: #ffffff;
-  padding: 15px;
+  min-height: 380px;
   border-radius: 10px;
-
-  height: 600px; /* harmonisé avec ta map */
-  overflow-y: auto;
-
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  border: 1px solid #e5e5e5;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
 }
 
+/* ===== Responsive ===== */
 
-/* Titre To-Do */
-.window-wrapper h3 {
-  margin-bottom: 12px;
-  color: #007bff;
-  font-size: 18px;
+@media (max-width: 900px) {
+  .map-window-wrapper {
+    flex-direction: column;
+  }
+
+  .map-wrapper,
+  .window-wrapper {
+    width: 100%;
+  }
+
+  .window-wrapper {
+    margin-top: 10px;
+  }
 }
 
-/* Checkbox styling */
-.window-wrapper label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  font-size: 15px;
-}
-/* ===== FOND SYMPATHIQUE ===== */
+@media (max-width: 600px) {
+  header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-body {
-  background: linear-gradient(
-    135deg,
-    #dbeafe 0%,
-    #bfdbfe 35%,
-    #93c5fd 100%
-  );
-  background-attachment: fixed;
-}
+  .content {
+    padding: 16px;
+  }
 
-
-.logout-button {
- 
-  padding: 10px 18px;
-  background-color: #ff4d4d;      /* rouge doux */
-  color: white;
-  font-weight: 600;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.25s ease;
-}
-
-.logout-button:hover {
-  background-color: #d93636;      /* un rouge plus foncé au hover */
-  transform: translateY(-2px);    /* petit effet relevé */
-}
-
-.logout-button:active {
-  transform: translateY(0);       /* enlève l'effet quand on clique */
-}
-
-.logout-button:focus {
-  outline: 2px solid #ffb3b3;     /* halo léger */
+  form {
+    padding: 12px;
+  }
 }

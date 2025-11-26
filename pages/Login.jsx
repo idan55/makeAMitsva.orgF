@@ -25,9 +25,9 @@ const handleSubmit = async (e) => {
     const data = await LoginUser({ email, password });
 
     // met l'utilisateur dans le contexte !
-    login(data.user);
+    login(data);
 
-    setMessage("Utilisateur connecté");
+    setMessage("User connected");
   } catch (err) {
     setError(err.message);
   } finally {
