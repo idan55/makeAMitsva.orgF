@@ -41,3 +41,36 @@ export async function LoginUser({ email, password }) {
 
   return data;
 }
+
+
+
+// Create a new request (needs token)
+export async function createRequest({ title, description, latitude, longitude, token }) {
+  const res = await fetch(`${API_URL}/requests`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title, description, latitude, longitude }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to create request");
+  return data; // { message, request }
+}
+
+// Get nearby requests (PUBLIC)
+export async function getNearbyRequests({ latitude, longitude, distanceKm }) {
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    distanceInMeters: String(distanceKm * 1000), // km → m
+  });
+
+  const res = await fetch(`${API_URL}/requests/nearby?${params.toString()}`);
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch nearby requests");
+  return data; // { message, requests }
+}

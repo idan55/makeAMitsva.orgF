@@ -1,44 +1,39 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
+
 // 1️⃣ Créer le contexte
 export const AuthContext = createContext();
 
-// 2️⃣ Hook personnalisé pour utiliser le contexte
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
-
-// 3️⃣ Provider
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // Charger l'utilisateur depuis localStorage au démarrage
+  // On first load, restore user from localStorage if present
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    if (storedUser && token) {
       try {
         setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.error('Error parsing user from localStorage:', err);
-        localStorage.removeItem('user');
+      } catch {
+        // if bad JSON, just clear it
+        localStorage.removeItem("user");
       }
     }
   }, []);
 
-  const login = (userData) => {
-    console.log('Login called with:', userData); // ✅ Debug
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+  // data is the full login response: { message, token, user }
+  const login = (data) => {
+    if (!data || !data.user || !data.token) return;
+    setUser(data.user);
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
   };
 
   const logout = () => {
     console.log('Logout called'); // ✅ Debug
     setUser(null);
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (

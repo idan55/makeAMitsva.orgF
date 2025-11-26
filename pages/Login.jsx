@@ -23,12 +23,18 @@ function Login() {
 
     try {
       const data = await LoginUser({ email, password });
-
-      // met l'utilisateur dans le contexte !
-      login(data.user);
+    // met l'utilisateur dans le contexte !
+    login(data);
+    setMessage("User connected");
+    navigate('/'); // Redirige vers la page d'accueil
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
       setMessage("Utilisateur connecté");
-      navigate('/'); // Redirige vers la page d'accueil
     } catch (err) {
       setError(err.message);
     } finally {

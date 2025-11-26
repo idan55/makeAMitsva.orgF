@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../src/Authcontext";
 import '../src/App.css'
@@ -9,19 +9,21 @@ function Header() {
     <header>
       <h1>Make A Mitsva</h1>
 
-      <NavLink to="/">Home Page</NavLink>
+      <NavLink to="/">Home</NavLink>
 
-      {user ? (
+      {!user && (
+        <>
+          <NavLink to="/register">Register</NavLink>
+          <NavLink to="/login">Login</NavLink>
+        </>
+      )}
+
+      {user && (
         <>
           <NavLink to="/myaccount">My Account</NavLink>
-          <button onClick={logout} style={{ marginLeft: "500px" }} className="logout-button">
+          <button onClick={logout} style={{ marginLeft: "12px" }}>
             Logout
           </button>
-        </>
-      ) : (
-        <>
-          <NavLink to="/login">Login</NavLink>
-          <NavLink to="/register">Register</NavLink>
         </>
       )}
     </header>
