@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { registerUser, LoginUser } from "../src/Api"; // ✅ Importe LoginUser
+import { registerUser, LoginUser } from "../src/Api";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../src/Authcontext"; // ✅ Importe le contexte
+import { useAuth } from "../src/Authcontext";
 
 function Register() {
   const [name, setName] = useState("");
@@ -16,7 +16,7 @@ function Register() {
   const [error, setError] = useState("");
   
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ Récupère la fonction login du contexte
+  const { login } = useAuth();
 
   const validatePassword = (value) => {
     if (value.length < 8) return "it needs at least 8 characters.";
@@ -36,8 +36,10 @@ function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
   
-    if (error !== "") {
-      setFeedback("Password is not valid");
+    // Vérification finale du mot de passe
+    const passwordError = validatePassword(password);
+    if (passwordError !== "") {
+      setFeedback("Password is not valid: " + passwordError);
       setFeedbackType("error");
       return;
     }
@@ -45,25 +47,24 @@ function Register() {
     const data = { name, age, email, password, phone };
   
     try {
-      // 1️⃣ Créer le compte
+      console.log("1️⃣ Creating account...");
       await registerUser(data);
   
-      // 2️⃣ Connecter automatiquement (EXACTEMENT comme Login)
+      console.log("2️⃣ Logging in automatically...");
       const loginData = await LoginUser({ email, password });
       
-      // 3️⃣ Sauvegarder dans le contexte (EXACTEMENT comme Login)
+      console.log("3️⃣ Saving user to context:", loginData.user);
       login(loginData.user);
   
       setFeedback("Account created and logged in!");
       setFeedbackType("success");
   
-      // 4️⃣ Rediriger (EXACTEMENT comme Login)
       setTimeout(() => {
         navigate('/');
-      }, 1000);
+      }, 1500);
   
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error:", err);
       setFeedback(err.message || "An error occurred");
       setFeedbackType("error");
     }
@@ -143,6 +144,8 @@ function Register() {
               style={{
                 color: feedbackType === "error" ? "red" : "green",
                 marginTop: "10px",
+                fontSize: "16px",
+                fontWeight: "bold"
               }}
             >
               {feedback}
