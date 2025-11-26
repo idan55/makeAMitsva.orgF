@@ -1,7 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext } from "react";
 
-
-// 1️⃣ Créer le contexte
 export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
@@ -15,7 +13,6 @@ export function AuthProvider({ children }) {
       try {
         setUser(JSON.parse(storedUser));
       } catch {
-        // if bad JSON, just clear it
         localStorage.removeItem("user");
       }
     }
@@ -30,7 +27,6 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    console.log('Logout called'); // ✅ Debug
     setUser(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -41,4 +37,9 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-};
+}
+
+// 🔹 Custom hook so you can `import { useAuth } from "../src/Authcontext"`
+export function useAuth() {
+  return useContext(AuthContext);
+}
