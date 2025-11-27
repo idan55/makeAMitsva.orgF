@@ -55,6 +55,23 @@ function Map({ userPos, requests, selectedId, onSelectRequest }) {
   // refs for each marker (by request id)
   const markerRefs = useRef({});
 
+
+function AutoZoom({ requests }) {
+  const map = useMap();
+
+  if (requests.length > 0) {
+    const bounds = L.latLngBounds(
+      requests.map((req) => [
+        req.location.coordinates[1],
+        req.location.coordinates[0],
+      ])
+    );
+    map.fitBounds(bounds, { padding: [50, 50] });
+  }
+
+  return null;
+}
+
   return (
     <div className="map-container-style">
       <MapContainer center={defaultPosition} zoom={13} className="map-full">
@@ -110,6 +127,7 @@ function Map({ userPos, requests, selectedId, onSelectRequest }) {
             </Marker>
           );
         })}
+        <AutoZoom requests={requests} />
       </MapContainer>
     </div>
   );

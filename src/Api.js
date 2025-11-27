@@ -1,4 +1,7 @@
+// src/Api.js
 const API_URL = "http://localhost:4000/api";
+
+// ---------- USER API ----------
 
 export async function registerUser({ name, age, email, password, phone }) {
   const res = await fetch(`${API_URL}/users/register`, {
@@ -19,7 +22,7 @@ export async function registerUser({ name, age, email, password, phone }) {
     throw new Error(data.error || "Registration failed");
   }
 
-  return data;
+  return data; // { message, user }
 }
 
 export async function LoginUser({ email, password }) {
@@ -38,8 +41,23 @@ export async function LoginUser({ email, password }) {
     throw new Error(data.error || "Login failed");
   }
 
-  return data;
+  return data; // { message, token, user }
 }
+
+export async function getMe(token) {
+  const res = await fetch(`${API_URL}/users/me`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load user");
+  return data.user; // sanitized user
+}
+
+// ---------- REQUESTS API ----------
 
 // Create a new request (needs token)
 export async function createRequest({
@@ -64,16 +82,80 @@ export async function createRequest({
 }
 
 // Get nearby requests (PUBLIC)
-export async function getNearbyRequests({ latitude, longitude, distanceKm }) {
+export async function getNearbyRequests({
+  latitude,
+  longitude,
+  distanceKm,
+}) {
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
-    distanceInMeters: String(distanceKm * 1000), // km → m
+    distanceInMeters: String(distanceKm * 1000),
   });
 
   const res = await fetch(`${API_URL}/requests/nearby?${params.toString()}`);
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch nearby requests");
+  return data; // { message, requests }
+}
+
+// "I want to help" (helper claims the request)
+export async function wantToHelpRequest(id, token) {
+  const res = await fetch(`${API_URL}/requests/${id}/help`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to mark as helper");
+  return data; // { message, request }
+}
+
+// "Completed" (creator confirms completion)
+export async function completeRequest(id, token) {
+  const res = await fetch(`${API_URL}/requests/${id}/complete`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to mark completed");
+  return data; // { message, request }
+}
+
+// My open requests (created by me, not completed)
+export async function getMyOpenRequests(token) {
+  const res = await fetch(`${API_URL}/requests/my-open`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error(data.error || "Failed to fetch my open requests");
+  return data; // { message, requests }
+}
+
+// Requests I solved for others (completedBy = me, isCompleted = true)
+export async function getRequestsISolved(token) {
+  const res = await fetch(`${API_URL}/requests/i-solved`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error(data.error || "Failed to fetch solved requests");
   return data; // { message, requests }
 }
