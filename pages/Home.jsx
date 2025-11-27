@@ -2,19 +2,29 @@ import React, { useEffect, useState, useRef } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Map from "../components/Map";
-import { createRequest, getNearbyRequests } from "../src/Api";
+import {
+  createRequest,
+  getNearbyRequests,
+  wantToHelpRequest,
+  completeRequest,
+} from "../src/Api";
+import { useAuth } from "../src/Authcontext";
 
 function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState("");
+===  const [success, setSuccess] = useState("");
+
   const [userPos, setUserPos] = useState(null); // [lat, lng]
   const [radiusKm, setRadiusKm] = useState(5);
   const [requests, setRequests] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedId, setSelectedId] = useState(null);
-  
+  const [selectedId, setSelectedId] = useState(null); // ONE selected request
+
+  const { user } = useAuth();
+
+
   // refs for each request item in the list
   const itemRefs = useRef({});
 
@@ -36,7 +46,6 @@ function Home() {
     try {
       setError("");
       setSuccess("");
-      
       const [lat, lng] = userPos;
       const data = await createRequest({
         title,
@@ -44,8 +53,8 @@ function Home() {
         latitude: lat,
         longitude: lng,
         token,
-      });
-      
+      }); // { message, request }
+
       setRequests((prev) => [...prev, data.request]);
       setTitle("");
       setDescription("");
@@ -57,7 +66,51 @@ function Home() {
     }
   }
 
-  // Get user's location
+  // Helper: "I want to help"
+  async function handleWantToHelp(requestId, e) {
+    e.stopPropagation();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to help");
+      return;
+    }
+
+    try {
+      setError("");
+      const data = await wantToHelpRequest(requestId, token);
+      // replace that request in state
+      setRequests((prev) =>
+        prev.map((r) => (r._id === requestId ? data.request : r))
+      );
+    } catch (err) {
+      console.error("wantToHelp error:", err);
+      setError(err.message || "Failed to mark as helper");
+    }
+  }
+
+  // Creator: "Mark as completed"
+  async function handleMarkCompleted(requestId, e) {
+    e.stopPropagation();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in");
+      return;
+    }
+
+    try {
+      setError("");
+      const data = await completeRequest(requestId, token);
+      // replace that request in state
+      setRequests((prev) =>
+        prev.map((r) => (r._id === requestId ? data.request : r))
+      );
+    } catch (err) {
+      console.error("markCompleted error:", err);
+      setError(err.message || "Failed to mark as completed");
+    }
+  }
+
+  // Get user’s location
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -89,7 +142,7 @@ function Home() {
         setRequests(data.requests || []);
       } catch (err) {
         console.error(err);
-        setError(err.message);
+        setError(err.message || "Failed to load nearby requests");
       } finally {
         setLoading(false);
       }
@@ -132,6 +185,13 @@ function Home() {
               style={{ marginLeft: "10px", width: "200px" }}
             />
           </label>
+          <button
+            onClick={() => {
+              setRadiusKm(20000);
+            }}
+          >
+            Global requests
+          </button>
         </div>
 
         {/* Create request */}
@@ -240,6 +300,13 @@ function Home() {
                 )}
                 {requests.map((req) => {
                   const isExpanded = selectedId === req._id;
+                  const currentUserId = user?.id || user?._id;
+                  const creatorId = req.createdBy?._id || req.createdBy;
+                  const helperId = req.completedBy?._id || req.completedBy;
+
+                  const isOwner = currentUserId && creatorId === currentUserId;
+                  const isHelper = currentUserId && helperId === currentUserId;
+
                   return (
                     <div
                       key={req._id}
@@ -265,13 +332,43 @@ function Home() {
                       <div style={{ fontSize: "12px", color: "#999", marginTop: "3px" }}>
                         Posted: {new Date(req.createdAt).toLocaleString()}
                       </div>
-                      
+                      {req.distance != null && (
+                        <div>
+                          Distance: {(req.distance / 1000).toFixed(2)} km
+                        </div>
+                      )}
+
+                      {req.isCompleted && (
+                        <div style={{ color: "green", fontWeight: "bold" }}>
+                          Solved ✓
+                        </div>
+                      )}
+
                       {isExpanded && (
                         <>
-                          <hr style={{ margin: "10px 0" }} />
-                          <p style={{ fontSize: "14px", margin: "10px 0" }}>
-                            {req.description}
-                          </p>
+                          <hr />
+                          <p>{req.description}</p>
+
+                          {/* Helper button: only for non-owners on open requests */}
+                          {!isOwner && !req.isCompleted && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleWantToHelp(req._id, e)}
+                            >
+                              I want to help
+                            </button>
+                          )}
+
+                          {/* Owner button: only for creator on open requests */}
+                          {isOwner && !req.isCompleted && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleMarkCompleted(req._id, e)}
+                            >
+                              Mark as completed
+                            </button>
+                          )}
+
                           <button
                             type="button"
                             onClick={(e) => {

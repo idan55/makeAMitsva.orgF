@@ -29,6 +29,9 @@ function Login() {
       login(data);          // pass the whole data object
       navigate("/");        // go directly to home page
       // setMessage("Utilisateur connecté"); // optional, not needed if we navigate
+      login(data);          // pass the whole data object
+      navigate("/");        // go directly to home page
+      // setMessage("Utilisateur connecté"); // optional, not needed if we navigate
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {

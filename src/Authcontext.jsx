@@ -1,3 +1,4 @@
+// src/Authcontext.jsx
 import { createContext, useState, useEffect, useContext } from "react";
 
 export const AuthContext = createContext();
@@ -18,7 +19,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // data is the full login response: { message, token, user }
+  // data is { message?, token, user }
   const login = (data) => {
     if (!data || !data.user || !data.token) return;
     setUser(data.user);
@@ -39,7 +40,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-// 🔹 Custom hook so you can `import { useAuth } from "../src/Authcontext"`
+// Custom hook
 export function useAuth() {
   return useContext(AuthContext);
 }
