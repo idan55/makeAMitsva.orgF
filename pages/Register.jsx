@@ -41,6 +41,7 @@ function Register() {
     const passwordError = validatePassword(password);
     if (passwordError !== "") {
       setFeedback("Password is not valid: " + passwordError);
+
       setFeedbackType("error");
       return;
     }
@@ -48,21 +49,18 @@ function Register() {
     const data = { name, age, email, password, phone };
 
     try {
-      console.log("1️⃣ Creating account...");
-      await registerUser(data);
-
-      console.log("2️⃣ Logging in automatically...");
+      // Register the user
+      const registerData = await registerUser(data);
+      // Automatically log in the user after registration
       const loginData = await LoginUser({ email, password });
-      // loginData = { message, token, user }
-
-      console.log("3️⃣ Saving user to context:", loginData.user);
-      login(loginData); // pass full response object (token + user)
-
+      login(loginData); // Save user in context
       setFeedback("Account created and logged in!");
       setFeedbackType("success");
 
-      // Go directly to home page
-      navigate("/");
+      // Redirect to homepage
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (err) {
       console.error("❌ Error:", err);
       setFeedback(err.message || "An error occurred");
