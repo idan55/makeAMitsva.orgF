@@ -13,7 +13,7 @@ import { useAuth } from "../src/Authcontext";
 function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-===  const [success, setSuccess] = useState("");
+ const [success, setSuccess] = useState("");
 
   const [userPos, setUserPos] = useState(null); // [lat, lng]
   const [radiusKm, setRadiusKm] = useState(5);

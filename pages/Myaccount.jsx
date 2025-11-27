@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import Graph from "../components/Graph";
 import { useAuth } from "../src/Authcontext";
 import {
   getMyOpenRequests,
