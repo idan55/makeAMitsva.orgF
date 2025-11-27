@@ -224,8 +224,12 @@ function Myaccount() {
           </div>
         )}
       </div>
+      <Graph/>
 
       <Footer />
+
+ 
+
     </div>
   );
 }
