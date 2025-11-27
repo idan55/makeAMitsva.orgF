@@ -13,7 +13,7 @@ import { useAuth } from "../src/Authcontext";
 function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState("");
+  const [success, setSuccess] = useState(""); // ✅ success message
 
   const [userPos, setUserPos] = useState(null); // [lat, lng]
   const [radiusKm, setRadiusKm] = useState(5);
@@ -24,7 +24,6 @@ function Home() {
 
   const { user } = useAuth();
 
-
   // refs for each request item in the list
   const itemRefs = useRef({});
 
@@ -32,17 +31,17 @@ function Home() {
   async function handleCreateRequest(e) {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
       alert("You must be logged in to create a request");
       return;
     }
-    
+
     if (!userPos) {
       alert("Location not ready yet");
       return;
     }
-    
+
     try {
       setError("");
       setSuccess("");
@@ -127,18 +126,18 @@ function Home() {
   useEffect(() => {
     async function loadRequests() {
       if (!userPos) return;
-      
+
       try {
         setLoading(true);
         setError("");
-        
+
         const [lat, lng] = userPos;
         const data = await getNearbyRequests({
           latitude: lat,
           longitude: lng,
           distanceKm: radiusKm,
         });
-        
+
         setRequests(data.requests || []);
       } catch (err) {
         console.error(err);
@@ -147,7 +146,7 @@ function Home() {
         setLoading(false);
       }
     }
-    
+
     loadRequests();
   }, [userPos, radiusKm]);
 
@@ -159,7 +158,7 @@ function Home() {
   // Auto-scroll to selected card when selectedId changes
   useEffect(() => {
     if (!selectedId) return;
-    
+
     const el = itemRefs.current[selectedId];
     if (el && el.scrollIntoView) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -204,12 +203,12 @@ function Home() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            style={{ 
-              width: "100%", 
-              padding: "10px", 
+            style={{
+              width: "100%",
+              padding: "10px",
               marginBottom: "10px",
               borderRadius: "4px",
-              border: "1px solid #ccc"
+              border: "1px solid #ccc",
             }}
           />
           <textarea
@@ -218,16 +217,16 @@ function Home() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
-            style={{ 
-              width: "100%", 
-              padding: "10px", 
+            style={{
+              width: "100%",
+              padding: "10px",
               marginBottom: "10px",
               borderRadius: "4px",
               border: "1px solid #ccc",
-              minHeight: "80px"
+              minHeight: "80px",
             }}
           />
-          <button 
+          <button
             type="submit"
             style={{
               padding: "10px 20px",
@@ -236,7 +235,7 @@ function Home() {
               border: "none",
               borderRadius: "4px",
               cursor: "pointer",
-              fontWeight: "bold"
+              fontWeight: "bold",
             }}
           >
             Create request
@@ -258,19 +257,16 @@ function Home() {
 
         {/* Map + scroll list */}
         {userPos && (
-          <div 
+          <div
             className="map-window-wrapper"
             style={{
               display: "flex",
               gap: "20px",
-              marginTop: "20px"
+              marginTop: "20px",
             }}
           >
             {/* MAP */}
-            <div 
-              className="map-wrapper"
-              style={{ flex: "1 1 60%" }}
-            >
+            <div className="map-wrapper" style={{ flex: "1 1 60%" }}>
               <Map
                 userPos={userPos}
                 requests={requests}
@@ -280,19 +276,16 @@ function Home() {
             </div>
 
             {/* SCROLL LIST */}
-            <div 
-              className="window-wrapper"
-              style={{ flex: "1 1 40%" }}
-            >
+            <div className="window-wrapper" style={{ flex: "1 1 40%" }}>
               <h3>Nearest requests</h3>
-              <div 
+              <div
                 className="request-list"
                 style={{
                   maxHeight: "500px",
                   overflowY: "auto",
                   border: "1px solid #ddd",
                   borderRadius: "8px",
-                  padding: "10px"
+                  padding: "10px",
                 }}
               >
                 {requests.length === 0 && (
@@ -318,18 +311,32 @@ function Home() {
                       style={{
                         padding: "15px",
                         marginBottom: "10px",
-                        border: isExpanded ? "2px solid #007bff" : "1px solid #ddd",
+                        border: isExpanded
+                          ? "2px solid #007bff"
+                          : "1px solid #ddd",
                         borderRadius: "8px",
                         cursor: "pointer",
                         backgroundColor: isExpanded ? "#f0f8ff" : "white",
-                        transition: "all 0.3s ease"
+                        transition: "all 0.3s ease",
                       }}
                     >
                       <strong>{req.title}</strong>
-                      <div style={{ fontSize: "14px", color: "#666", marginTop: "5px" }}>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          color: "#666",
+                          marginTop: "5px",
+                        }}
+                      >
                         Age: {req.createdBy?.age ?? "N/A"}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#999", marginTop: "3px" }}>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#999",
+                          marginTop: "3px",
+                        }}
+                      >
                         Posted: {new Date(req.createdAt).toLocaleString()}
                       </div>
                       {req.distance != null && (
@@ -382,7 +389,7 @@ function Home() {
                               border: "none",
                               borderRadius: "4px",
                               cursor: "pointer",
-                              fontWeight: "bold"
+                              fontWeight: "bold",
                             }}
                           >
                             Open chat
