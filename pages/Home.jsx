@@ -7,6 +7,7 @@ import { createRequest, getNearbyRequests } from "../src/Api";
 function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(""); // ✅ success message
   const [userPos, setUserPos] = useState(null); // [lat, lng]
   const [radiusKm, setRadiusKm] = useState(5);
   const [requests, setRequests] = useState([]);
@@ -34,6 +35,7 @@ function Home() {
 
     try {
       setError("");
+      setSuccess(""); // clear old success
       const [lat, lng] = userPos;
 
       const data = await createRequest({
@@ -42,14 +44,16 @@ function Home() {
         latitude: lat,
         longitude: lng,
         token,
-      });
+      }); // data = { message, request }
 
       setRequests((prev) => [...prev, data.request]);
       setTitle("");
       setDescription("");
+      setSuccess(data.message || "Request successfully created ✅"); // ✅ show backend message
     } catch (err) {
       console.error("Error creating request:", err);
-      setError(err.message);
+      setError(err.message || "Failed to create request");
+      setSuccess("");
     }
   }
 
@@ -150,8 +154,19 @@ function Home() {
           <button type="submit">Create request</button>
         </form>
 
+        {/* ✅ Feedback messages */}
+        {success && (
+          <p style={{ color: "green", marginTop: "10px", fontWeight: "bold" }}>
+            {success}
+          </p>
+        )}
+        {error && (
+          <p style={{ color: "red", marginTop: "10px", fontWeight: "bold" }}>
+            {error}
+          </p>
+        )}
+
         {loading && <p>Loading nearby mitzvot...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
 
         {/* Map + scroll list */}
         {userPos && (

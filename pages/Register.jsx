@@ -14,7 +14,7 @@ function Register() {
   const [feedback, setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
   const [error, setError] = useState("");
-  
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -22,7 +22,8 @@ function Register() {
     if (value.length < 8) return "it needs at least 8 characters.";
     if (!/[A-Z]/.test(value)) return "it needs at least one uppercase letter.";
     if (!/[0-9]/.test(value)) return "it needs at least one number.";
-    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) return "it needs at least one special character.";
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value))
+      return "it needs at least one special character.";
     return "";
   };
 
@@ -35,34 +36,33 @@ function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-  
-    // Vérification finale du mot de passe
+
+    // Final password validation
     const passwordError = validatePassword(password);
     if (passwordError !== "") {
       setFeedback("Password is not valid: " + passwordError);
       setFeedbackType("error");
       return;
     }
-  
+
     const data = { name, age, email, password, phone };
-  
+
     try {
       console.log("1️⃣ Creating account...");
       await registerUser(data);
-  
+
       console.log("2️⃣ Logging in automatically...");
       const loginData = await LoginUser({ email, password });
-      
+      // loginData = { message, token, user }
+
       console.log("3️⃣ Saving user to context:", loginData.user);
-      login(loginData.user);
-  
+      login(loginData); // pass full response object (token + user)
+
       setFeedback("Account created and logged in!");
       setFeedbackType("success");
-  
-      setTimeout(() => {
-        navigate('/');
-      }, 1500);
-  
+
+      // Go directly to home page
+      navigate("/");
     } catch (err) {
       console.error("❌ Error:", err);
       setFeedback(err.message || "An error occurred");
@@ -145,7 +145,7 @@ function Register() {
                 color: feedbackType === "error" ? "red" : "green",
                 marginTop: "10px",
                 fontSize: "16px",
-                fontWeight: "bold"
+                fontWeight: "bold",
               }}
             >
               {feedback}

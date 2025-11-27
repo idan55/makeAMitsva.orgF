@@ -9,8 +9,8 @@ export async function registerUser({ name, age, email, password, phone }) {
       age: Number(age),
       email,
       password,
-      phone
-    })
+      phone,
+    }),
   });
 
   const data = await res.json();
@@ -19,9 +19,8 @@ export async function registerUser({ name, age, email, password, phone }) {
     throw new Error(data.error || "Registration failed");
   }
 
-  return data; 
+  return data;
 }
-
 
 export async function LoginUser({ email, password }) {
   const res = await fetch(`${API_URL}/users/login`, {
@@ -30,7 +29,7 @@ export async function LoginUser({ email, password }) {
     body: JSON.stringify({
       email,
       password,
-    })
+    }),
   });
 
   const data = await res.json();
@@ -42,10 +41,14 @@ export async function LoginUser({ email, password }) {
   return data;
 }
 
-
-
 // Create a new request (needs token)
-export async function createRequest({ title, description, latitude, longitude, token }) {
+export async function createRequest({
+  title,
+  description,
+  latitude,
+  longitude,
+  token,
+}) {
   const res = await fetch(`${API_URL}/requests`, {
     method: "POST",
     headers: {

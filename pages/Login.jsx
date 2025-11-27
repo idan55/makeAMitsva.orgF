@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { LoginUser } from "../src/Api";
 import { AuthContext } from "../src/Authcontext";
+import { useNavigate } from "react-router-dom";
 
 import "../src/App.css";
 
@@ -14,6 +15,7 @@ function Login() {
   const [message, setMessage] = useState("");
 
   const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +26,9 @@ function Login() {
     try {
       const data = await LoginUser({ email, password });
       // data = { message, token, user }
-      login(data); // VERY IMPORTANT: pass the whole data object, not data.user
-      setMessage("Utilisateur connecté");
+      login(data);          // pass the whole data object
+      navigate("/");        // go directly to home page
+      // setMessage("Utilisateur connecté"); // optional, not needed if we navigate
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
