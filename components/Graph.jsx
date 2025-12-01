@@ -7,7 +7,13 @@ function Graph() {
   useEffect(() => {
     const fetchChart = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/graphs/chart");
+        const token = localStorage.getItem("token"); // ou ton contexte auth
+        const response = await fetch("http://localhost:4000/api/graphs/user-activity", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (!response.ok) throw new Error("HTTP error " + response.status);
 
         const blob = await response.blob();
@@ -23,12 +29,8 @@ function Graph() {
 
   return (
     <div>
-      <h1>Graph</h1>
-      {chartUrl ? (
-        <img src={chartUrl} alt="chart" />
-      ) : (
-        <p>Loading chart...</p>
-      )}
+      <h1 style={{width:"300px",height:"300px"}}>Graph</h1>
+      {chartUrl ? <img src={chartUrl} alt="chart" /> : <p>Loading chart...</p>}
     </div>
   );
 }
