@@ -82,11 +82,7 @@ export async function createRequest({
 }
 
 // Get nearby requests (PUBLIC)
-export async function getNearbyRequests({
-  latitude,
-  longitude,
-  distanceKm,
-}) {
+export async function getNearbyRequests({ latitude, longitude, distanceKm }) {
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
@@ -155,8 +151,7 @@ export async function getRequestsISolved(token) {
   });
 
   const data = await res.json();
-  if (!res.ok)
-    throw new Error(data.error || "Failed to fetch solved requests");
+  if (!res.ok) throw new Error(data.error || "Failed to fetch solved requests");
   return data; // { message, requests }
 }
 
@@ -180,4 +175,19 @@ export async function startChat({ otherUserId, token }) {
 
   // data should be: { chatId, chat }
   return data;
+}
+
+// Requests I created that are completed
+export async function getMyCompletedRequests(token) {
+  const res = await fetch(`${API_URL}/requests/my-completed`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error(data.error || "Failed to fetch my completed requests");
+  return data; // { message, requests }
 }

@@ -1,9 +1,17 @@
 // components/ChatWindow/ChatWindow.jsx
 import React, { useEffect, useRef, useState } from "react";
-import "./ChatWindow.css";
+import "./ChatWindow.css"
+
 const API_URL = "http://localhost:4000/api";
 
-function ChatWindow({ chatId, currentUser, otherUser, requestTitle, onClose }) {
+function ChatWindow({
+  chatId,
+  currentUser,
+  otherUser,
+  requestTitle,
+  isReadOnly,
+  onClose,
+}) {
   const [messages, setMessages] = useState([]); // always array
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,6 +69,11 @@ function ChatWindow({ chatId, currentUser, otherUser, requestTitle, onClose }) {
     e.preventDefault();
     if (!text.trim()) return;
 
+    // 🔒 If read-only: do nothing
+    if (isReadOnly) {
+      return;
+    }
+
     try {
       setSending(true);
       const token = localStorage.getItem("token");
@@ -98,13 +111,12 @@ function ChatWindow({ chatId, currentUser, otherUser, requestTitle, onClose }) {
 
   const safeMessages = Array.isArray(messages) ? messages : [];
 
-  // --- figure out the *other* person's name ---
   const currentUserId = currentUser?._id || currentUser?.id;
 
   let otherUserName =
     otherUser?.name || otherUser?.firstname || otherUser?.email || null;
 
-  // If we didn't get a name from props, derive it from messages
+  // If no name from props, try derive from messages
   if (!otherUserName && safeMessages.length > 0) {
     const otherMsg = safeMessages.find((msg) => {
       const senderId =
@@ -129,16 +141,16 @@ function ChatWindow({ chatId, currentUser, otherUser, requestTitle, onClose }) {
     <div className="chat-window">
       <div className="chat-header">
         <div className="chat-title">
-          <button className="chat-close" onClick={onClose}>
-            ×
-          </button>
           {requestTitle && (
             <div style={{ fontWeight: "bold", fontSize: "13px" }}>
-              {requestTitle}
+              Chat about: {requestTitle}
             </div>
           )}
-          <div style={{ fontSize: "12px" }}>To: {otherUserName}</div>
+          <div style={{ fontSize: "12px" }}>With {otherUserName}</div>
         </div>
+        <button className="chat-close" onClick={onClose}>
+          ×
+        </button>
       </div>
 
       <div className="chat-messages">
@@ -187,14 +199,25 @@ function ChatWindow({ chatId, currentUser, otherUser, requestTitle, onClose }) {
       </div>
 
       <form className="chat-input-area" onSubmit={handleSend}>
+        {isReadOnly && (
+          <div
+            className="chat-info"
+            style={{ fontSize: "11px", marginBottom: "4px", opacity: 0.7 }}
+          >
+            This mitzva is completed. Chat is read-only.
+          </div>
+        )}
+
         <input
           type="text"
-          placeholder="Type a message…"
+          placeholder={
+            isReadOnly ? "Chat closed for completed mitzva" : "Type a message…"
+          }
           value={text}
           onChange={(e) => setText(e.target.value)}
-          disabled={sending}
+          disabled={sending || isReadOnly}
         />
-        <button type="submit" disabled={sending || !text.trim()}>
+        <button type="submit" disabled={sending || !text.trim() || isReadOnly}>
           Send
         </button>
       </form>
