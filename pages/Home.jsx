@@ -2,7 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import Map from "../components/Map";
+import ChatWindow from "../components/ChatWindow/ChatWindow";
 import {
+  startChat,
   createRequest,
   getNearbyRequests,
   wantToHelpRequest,
@@ -13,19 +15,21 @@ import { useAuth } from "../src/Authcontext";
 function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(""); // ✅ success message
+  const [success, setSuccess] = useState("");
 
   const [userPos, setUserPos] = useState(null); // [lat, lng]
   const [radiusKm, setRadiusKm] = useState(5);
   const [requests, setRequests] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [selectedId, setSelectedId] = useState(null); // ONE selected request
+  const [selectedId, setSelectedId] = useState(null);
 
-  const { user } = useAuth();
+  const { user: currentUser } = useAuth();
 
-  // refs for each request item in the list
-  const itemRefs = useRef({});
+  const [activeChat, setActiveChat] = useState(null); // { chatId, otherUser, requestTitle }
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const itemRefs = useRef({}); // refs for scrolling to a request
 
   // Create a request
   async function handleCreateRequest(e) {
@@ -46,6 +50,7 @@ function Home() {
       setError("");
       setSuccess("");
       const [lat, lng] = userPos;
+
       const data = await createRequest({
         title,
         description,
@@ -77,7 +82,6 @@ function Home() {
     try {
       setError("");
       const data = await wantToHelpRequest(requestId, token);
-      // replace that request in state
       setRequests((prev) =>
         prev.map((r) => (r._id === requestId ? data.request : r))
       );
@@ -99,7 +103,6 @@ function Home() {
     try {
       setError("");
       const data = await completeRequest(requestId, token);
-      // replace that request in state
       setRequests((prev) =>
         prev.map((r) => (r._id === requestId ? data.request : r))
       );
@@ -150,7 +153,7 @@ function Home() {
     loadRequests();
   }, [userPos, radiusKm]);
 
-  // Called from map and from list
+  // Select request from map or list
   function handleSelectRequest(id) {
     setSelectedId((prev) => (prev === id ? null : id));
   }
@@ -164,6 +167,74 @@ function Home() {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [selectedId]);
+
+  // Open chat for a request
+  const handleOpenChat = async (request) => {
+    console.log("Open chat for request", request._id);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to chat");
+        return;
+      }
+
+      const currentUserId = currentUser?.id || currentUser?._id;
+      const creatorId = request.createdBy?._id || request.createdBy; // works for populated or ObjectId
+      const helperId = request.completedBy?._id || request.completedBy || null;
+
+      let otherUserId;
+
+      if (currentUserId === creatorId && helperId) {
+        // I am the creator, chat with the helper
+        otherUserId = helperId;
+      } else if (currentUserId === helperId) {
+        // I am the helper, chat with the creator
+        otherUserId = creatorId;
+      } else {
+        // I am just viewing / not creator or helper – chat with creator
+        otherUserId = creatorId;
+      }
+
+      if (!otherUserId) {
+        alert("No other user available to chat with yet.");
+        return;
+      }
+
+      if (otherUserId === currentUserId) {
+        console.error("Resolved otherUserId to currentUser", {
+          currentUserId,
+          creatorId,
+          helperId,
+        });
+        alert("Cannot start a chat with yourself.");
+        return;
+      }
+
+      const data = await startChat({
+        otherUserId,
+        token,
+      });
+
+      // Decide which user object to show as "otherUser" in UI
+      let otherUserObj = request.createdBy;
+      if (currentUserId === creatorId && request.completedBy) {
+        otherUserObj = request.completedBy;
+      } else if (currentUserId === helperId) {
+        otherUserObj = request.createdBy;
+      }
+
+      setActiveChat({
+        chatId: data.chatId,
+        otherUser: otherUserObj,
+        requestTitle: request.title,
+      });
+      setIsChatOpen(true);
+    } catch (err) {
+      console.error("Error opening chat:", err);
+      alert(err.message);
+    }
+  };
 
   return (
     <div className="page-container">
@@ -293,7 +364,8 @@ function Home() {
                 )}
                 {requests.map((req) => {
                   const isExpanded = selectedId === req._id;
-                  const currentUserId = user?.id || user?._id;
+
+                  const currentUserId = currentUser?.id || currentUser?._id;
                   const creatorId = req.createdBy?._id || req.createdBy;
                   const helperId = req.completedBy?._id || req.completedBy;
 
@@ -376,24 +448,28 @@ function Home() {
                             </button>
                           )}
 
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log("Open chat for", req._id);
-                            }}
-                            style={{
-                              padding: "8px 16px",
-                              backgroundColor: "#28a745",
-                              color: "white",
-                              border: "none",
-                              borderRadius: "4px",
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            Open chat
-                          </button>
+                          {/* Open chat button */}
+                          {(isOwner || isHelper) && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenChat(req);
+                              }}
+                              style={{
+                                padding: "8px 16px",
+                                backgroundColor: "#28a745",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                                marginLeft: "8px",
+                              }}
+                            >
+                              Open chat
+                            </button>
+                          )}
                         </>
                       )}
                     </div>
@@ -404,6 +480,18 @@ function Home() {
           </div>
         )}
       </div>
+
+      {/* Chat popup */}
+      {isChatOpen && activeChat && (
+        <ChatWindow
+          chatId={activeChat.chatId}
+          currentUser={currentUser}
+          otherUser={activeChat.otherUser}
+          requestTitle={activeChat.requestTitle}
+          onClose={() => setIsChatOpen(false)}
+        />
+      )}
+
       <Footer />
     </div>
   );

@@ -159,3 +159,25 @@ export async function getRequestsISolved(token) {
     throw new Error(data.error || "Failed to fetch solved requests");
   return data; // { message, requests }
 }
+
+// ---------- CHAT API ----------
+
+// Start or get a chat with another user
+export async function startChat({ otherUserId, token }) {
+  const res = await fetch(`${API_URL}/chats/start`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ otherUserId }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to start chat");
+  }
+
+  // data should be: { chatId, chat }
+  return data;
+}
