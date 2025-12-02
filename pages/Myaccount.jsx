@@ -147,6 +147,7 @@ function Myaccount() {
   };
 
   const stars = user?.stars ?? 0;
+  
   const starsPercent = Math.min((stars / 500) * 100, 100);
 
   return (
