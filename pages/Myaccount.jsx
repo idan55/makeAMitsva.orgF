@@ -155,6 +155,11 @@ function Myaccount() {
       <Header />
       <div className="content" style={{ padding: "20px" }}>
         <h1>My Account</h1>
+        <img
+  src={user?.profileImage || "/default-avatar.png"}
+  alt={user?.name || "Profile"}
+  style={{ width: "100px", borderRadius: "50%" }}
+/>
 
         {user && (
           <div style={{ marginBottom: "20px" }}>

@@ -11,6 +11,7 @@ function Register() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [age, setAge] = useState("");
+  const [profileImage, setProfileImage] = useState(""); // URL de Cloudinary
   const [feedback, setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
   const [error, setError] = useState("");
@@ -18,12 +19,13 @@ function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // Validation du mot de passe
   const validatePassword = (value) => {
-    if (value.length < 8) return "it needs at least 8 characters.";
-    if (!/[A-Z]/.test(value)) return "it needs at least one uppercase letter.";
-    if (!/[0-9]/.test(value)) return "it needs at least one number.";
+    if (value.length < 8) return "It needs at least 8 characters.";
+    if (!/[A-Z]/.test(value)) return "It needs at least one uppercase letter.";
+    if (!/[0-9]/.test(value)) return "It needs at least one number.";
     if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value))
-      return "it needs at least one special character.";
+      return "It needs at least one special character.";
     return "";
   };
 
@@ -34,39 +36,60 @@ function Register() {
     setError(message);
   };
 
-  async function handleSubmit(e) {
+  // Upload de l'image vers le backend (qui upload sur Cloudinary)
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const res = await fetch("http://localhost:4000/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      setProfileImage(data.url); // Stocke seulement l'URL
+    } catch (err) {
+      console.error("Image upload error:", err);
+      setFeedback("Error uploading image");
+      setFeedbackType("error");
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Final password validation
     const passwordError = validatePassword(password);
-    if (passwordError !== "") {
+    if (passwordError) {
       setFeedback("Password is not valid: " + passwordError);
-
       setFeedbackType("error");
       return;
     }
 
-    const data = { name, age, email, password, phone };
+    const data = { name, age, email, password, phone, profileImage };
 
     try {
-      // Register the user
-      const registerData = await registerUser(data);
-      // Automatically log in the user after registration
+      // Enregistre l'utilisateur dans la DB
+      await registerUser(data);
+      // Login automatique après inscription
       const loginData = await LoginUser({ email, password });
-      login(loginData); // Save user in context
+      login(loginData);
+
       setFeedback("Account created and logged in!");
       setFeedbackType("success");
 
-      // Redirect to homepage
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+      setTimeout(() => navigate("/"), 1000);
     } catch (err) {
       console.error("❌ Error:", err);
       setFeedback(err.message || "An error occurred");
       setFeedbackType("error");
     }
-  }
+  };
 
   return (
     <div className="page-container">
@@ -117,7 +140,7 @@ function Register() {
             required
           />
 
-          {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
 
           <label htmlFor="phone">Phone:</label>
           <input
@@ -129,11 +152,25 @@ function Register() {
             required
           />
 
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={error !== ""}
-          >
+          {/* Upload d'image */}
+          <label>Profile Picture:</label>
+          <input type="file" accept="image/*" onChange={handleImageUpload} />
+
+          {profileImage && (
+            <img
+              src={profileImage}
+              alt="Profile preview"
+              style={{
+                width: "120px",
+                height: "120px",
+                objectFit: "cover",
+                borderRadius: "50%",
+                marginTop: "10px",
+              }}
+            />
+          )}
+
+          <button type="submit" className="submit-button" disabled={error !== ""}>
             Create your account
           </button>
 
