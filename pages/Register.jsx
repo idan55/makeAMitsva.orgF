@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import { registerUser, LoginUser } from "../src/Api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../src/Authcontext";
+import { normalizeIsraeliPhone } from "../src/phoneUtils";
 
 function Register() {
   const [name, setName] = useState("");
@@ -14,6 +15,7 @@ function Register() {
   const [profileImage, setProfileImage] = useState(""); 
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   const navigate = useNavigate();
@@ -59,12 +61,31 @@ function Register() {
     }
   };
 
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    setPhone(value);
+
+    const normalized = normalizeIsraeliPhone(value);
+    if (value && !normalized) {
+      setPhoneError("Use an Israeli number like +9725XXXXXXXX");
+    } else {
+      setPhoneError("");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     const pwdError = validatePassword(password);
     if (pwdError) {
       setFeedback("Password error: " + pwdError);
+      return;
+    }
+
+    const normalizedPhone = normalizeIsraeliPhone(phone);
+    if (!normalizedPhone) {
+      setFeedback("Please enter a valid Israeli phone number (+9725XXXXXXXX).");
+      setPhoneError("Use an Israeli number like +9725XXXXXXXX");
       return;
     }
     
@@ -74,19 +95,22 @@ function Register() {
     }
   
     try {
-      // ✅ Vérifie que profileImage contient bien l'URL
-      console.log("📤 Sending profileImage:", profileImage); // Debug
-      
-      const userData = { name, age, email, password, phone, profileImage };
+      const userData = { name, age, email, password, phone: normalizedPhone, profileImage };
       const registerResponse = await registerUser(userData);
       
-      console.log("✅ Register response:", registerResponse); // Debug
+      // Prefer token from register response; otherwise fallback to login
+      if (registerResponse?.token && registerResponse?.user) {
+        login({ user: registerResponse.user, token: registerResponse.token });
+        localStorage.setItem("user", JSON.stringify(registerResponse.user));
+        localStorage.setItem("token", registerResponse.token);
+      } else {
+        const loginData = await LoginUser({ email, password });
+        login(loginData);
+      }
   
-      const loginData = await LoginUser({ email, password });
-      login(loginData.user); // ✅ Correction ici aussi
-  
+      setPhone(normalizedPhone); // reflect the normalized number in the form
       setFeedback("Account created and logged in!");
-      setTimeout(() => navigate("/"), 1000);
+      setTimeout(() => navigate("/"), 500);
     } catch (err) {
       console.error("❌ Registration error:", err);
       setFeedback(err.message || "Registration failed");
@@ -105,14 +129,30 @@ function Register() {
           <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
           <input type="password" placeholder="Password" value={password} onChange={handlePassChange} required style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
           {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
-          <input type="tel" placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} required style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
+          <input
+            type="tel"
+            placeholder="Phone (e.g. +9725XXXXXXXX)"
+            value={phone}
+            onChange={handlePhoneChange}
+            onBlur={() => {
+              const normalized = normalizeIsraeliPhone(phone);
+              if (normalized) setPhone(normalized);
+            }}
+            required
+            style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }}
+          />
+          {phoneError && <p style={{ color: "red", fontSize: "14px" }}>{phoneError}</p>}
 
           <label>Profile Picture:</label>
           <input type="file" accept="image/*" onChange={handleImageUpload} />
           {isUploading && <p>Uploading image...</p>}
           {profileImage && <img src={profileImage} alt="Preview" style={{ width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover", marginTop: "10px" }} />}
 
-          <button type="submit" disabled={error !== "" || isUploading} style={{ padding: "12px", borderRadius: "8px", background: "#2196f3", color: "white", fontWeight: "bold", border: "none", cursor: "pointer" }}>
+          <button
+            type="submit"
+            disabled={error !== "" || phoneError !== "" || isUploading || !profileImage}
+            style={{ padding: "12px", borderRadius: "8px", background: "#2196f3", color: "white", fontWeight: "bold", border: "none", cursor: isUploading ? "not-allowed" : "pointer", opacity: isUploading || !profileImage ? 0.6 : 1 }}
+          >
             Register
           </button>
 

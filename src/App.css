@@ -159,6 +159,13 @@ form button[type="submit"]:disabled {
   flex-direction: column;
 }
 
+/* Make Mapbox popup close (×) more visible */
+.mapboxgl-popup-close-button {
+  color: #e53935 !important;
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .window-wrapper h3 {
   margin: 4px 0 8px 0;
 }

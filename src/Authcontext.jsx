@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && storedToken) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log('🔄 Restored user from localStorage:', parsedUser);
         setUser(parsedUser);
       } catch (err) {
         console.error('Error parsing user from localStorage:', err);
@@ -35,8 +34,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
-    console.log('🔐 Login called with:', userData);
-    
     // Si userData contient { user, token }
     if (userData.user && userData.token) {
       setUser(userData.user);

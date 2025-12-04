@@ -3,7 +3,7 @@ const API_URL = "http://localhost:4000/api";
 
 // ---------- USER API ----------
 
-export async function registerUser({ name, age, email, password, phone }) {
+export async function registerUser({ name, age, email, password, phone, profileImage }) {
   const res = await fetch(`${API_URL}/users/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -13,6 +13,7 @@ export async function registerUser({ name, age, email, password, phone }) {
       email,
       password,
       phone,
+      profileImage,
     }),
   });
 
@@ -55,6 +56,92 @@ export async function getMe(token) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to load user");
   return data.user; // sanitized user
+}
+
+export async function updateProfileImage({ profileImage, token }) {
+  const res = await fetch(`${API_URL}/users/profile-image`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ profileImage }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to update profile image");
+  return data.user; // sanitized user
+}
+
+// ---------- ADMIN ----------
+
+export async function adminGetUsers(token) {
+  const res = await fetch(`${API_URL}/admin/users`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load users");
+  return data.users;
+}
+
+export async function adminBanUser(id, token) {
+  const res = await fetch(`${API_URL}/admin/users/${id}/ban`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to ban user");
+  return data.user;
+}
+
+export async function adminUnbanUser(id, token) {
+  const res = await fetch(`${API_URL}/admin/users/${id}/unban`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to unban user");
+  return data.user;
+}
+
+export async function adminDeleteUser(id, token) {
+  const res = await fetch(`${API_URL}/admin/users/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to delete user");
+  return data;
+}
+
+export async function adminGetRequests(token) {
+  const res = await fetch(`${API_URL}/admin/requests`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load requests");
+  return data.requests;
+}
+
+export async function adminDeleteRequest(id, token) {
+  const res = await fetch(`${API_URL}/admin/requests/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to delete request");
+  return data;
+}
+
+// Delete own account
+export async function deleteMyAccount({ userId, token }) {
+  const res = await fetch(`${API_URL}/users/delete/${userId}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to delete account");
+  return data;
 }
 
 // ---------- REQUESTS API ----------
@@ -158,14 +245,14 @@ export async function getRequestsISolved(token) {
 // ---------- CHAT API ----------
 
 // Start or get a chat with another user
-export async function startChat({ otherUserId, token }) {
+export async function startChat({ otherUserId, requestId, token }) {
   const res = await fetch(`${API_URL}/chats/start`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ otherUserId }),
+    body: JSON.stringify({ otherUserId, requestId }),
   });
 
   const data = await res.json();
@@ -175,6 +262,15 @@ export async function startChat({ otherUserId, token }) {
 
   // data should be: { chatId, chat }
   return data;
+}
+
+export async function listMyChats(token) {
+  const res = await fetch(`${API_URL}/chats/my`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to load chats");
+  return data.chats;
 }
 
 // Requests I created that are completed
