@@ -21,9 +21,9 @@ function Myaccount() {
   const [myCompletedCreated, setMyCompletedCreated] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [imageError, setImageError] = useState(false); // ✅ Pour empêcher la boucle
 
-  // Chat state (for viewing old chats)
-  const [activeChat, setActiveChat] = useState(null); // { chatId, otherUser, requestTitle, isReadOnly }
+  const [activeChat, setActiveChat] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
@@ -32,6 +32,7 @@ function Myaccount() {
         setLoading(true);
         setError("");
         const token = localStorage.getItem("token");
+        
         if (!token) {
           setError("You must be logged in to view your account.");
           setLoading(false);
@@ -62,33 +63,32 @@ function Myaccount() {
     try {
       setError("");
       const token = localStorage.getItem("token");
+      
       if (!token) {
         setError("You must be logged in");
         return;
       }
 
       await completeRequest(requestId, token);
-
-      // remove from open requests list
       setMyOpenRequests((prev) => prev.filter((r) => r._id !== requestId));
 
-      // refresh user (for stars/coupon)
-      const updatedUser = await getMe(token);
-      login({ user: updatedUser, token });
+      const updatedUserData = await getMe(token);
+      login(updatedUserData.user);
     } catch (err) {
       console.error("handleSolved error:", err);
       setError(err.message || "Failed to mark as solved");
     }
   }
 
-  // Open a read-only chat related to a completed request
   const handleOpenChat = async (request) => {
     try {
       const token = localStorage.getItem("token");
+      
       if (!token) {
         setError("You must be logged in to view chat.");
         return;
       }
+      
       if (!user) {
         setError("No user in context.");
         return;
@@ -101,17 +101,13 @@ function Myaccount() {
       let otherUserId;
       let otherUserObj;
 
-      // If I'm the creator, other is helper
       if (currentUserId === creatorId && helperId) {
         otherUserId = helperId;
         otherUserObj = request.completedBy || null;
-      }
-      // If I'm the helper, other is creator
-      else if (helperId && currentUserId === helperId) {
+      } else if (helperId && currentUserId === helperId) {
         otherUserId = creatorId;
         otherUserObj = request.createdBy;
       } else {
-        // Fallback: just talk to creator
         otherUserId = creatorId;
         otherUserObj = request.createdBy;
       }
@@ -122,11 +118,6 @@ function Myaccount() {
       }
 
       if (otherUserId === currentUserId) {
-        console.error("Resolved otherUserId to currentUser", {
-          currentUserId,
-          creatorId,
-          helperId,
-        });
         setError("Cannot open chat with yourself.");
         return;
       }
@@ -137,7 +128,7 @@ function Myaccount() {
         chatId: data.chatId,
         otherUser: otherUserObj,
         requestTitle: request.title,
-        isReadOnly: true, // 🔒 My account chats are read-only
+        isReadOnly: true,
       });
       setIsChatOpen(true);
     } catch (err) {
@@ -147,58 +138,124 @@ function Myaccount() {
   };
 
   const stars = user?.stars ?? 0;
-  
   const starsPercent = Math.min((stars / 500) * 100, 100);
+
+  console.log("👤 Current user:", user);
+  console.log("🖼️ Profile image:", user?.profileImage);
 
   return (
     <div className="page-container">
       <Header />
-      <div className="content" style={{ padding: "20px" }}>
-        <h1>My Account</h1>
+      <div className="content" style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+        <h1 style={{ marginBottom: "30px", textAlign: "center" }}>My Account</h1>
 
         {user && (
-          <div style={{ marginBottom: "20px" }}>
-            <p>
-              <strong>Name:</strong> {user.name}
-            </p>
-            <p>
-              <strong>Email:</strong> {user.email}
-            </p>
+          <div style={{ 
+            marginBottom: "40px", 
+            padding: "20px", 
+            background: "#f9f9f9", 
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+          }}>
+            <div style={{ textAlign: "center", marginBottom: "20px" }}>
+              {!imageError && user.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.name || "Profile"}
+                  onError={() => {
+                    console.error("❌ Image failed:", user.profileImage);
+                    setImageError(true);
+                  }}
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "4px solid #2196f3",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)"
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, #2196f3, #1976d2)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontSize: "48px",
+                    fontWeight: "bold",
+                    border: "4px solid #2196f3",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                    margin: "0 auto"
+                  }}
+                >
+                  {user.name ? user.name.charAt(0).toUpperCase() : "?"}
+                </div>
+              )}
+            </div>
 
-            <div style={{ marginTop: "20px" }}>
-              <p>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontSize: "18px", marginBottom: "8px" }}>
+                <strong>Name:</strong> {user.name}
+              </p>
+              <p style={{ fontSize: "16px", marginBottom: "8px", color: "#666" }}>
+                <strong>Email:</strong> {user.email}
+              </p>
+              <p style={{ fontSize: "16px", color: "#666" }}>
+                <strong>Phone:</strong> {user.phone}
+              </p>
+            </div>
+
+            <div style={{ marginTop: "30px" }}>
+              <p style={{ fontSize: "16px", marginBottom: "10px", textAlign: "center" }}>
                 <strong>Stars:</strong> {stars} / 500
               </p>
               <div
                 style={{
                   width: "100%",
-                  height: "20px",
+                  height: "24px",
                   background: "#ddd",
-                  borderRadius: "10px",
+                  borderRadius: "12px",
                   overflow: "hidden",
-                  marginTop: "5px",
+                  marginTop: "8px",
                 }}
               >
                 <div
                   style={{
                     height: "100%",
                     width: `${starsPercent}%`,
-                    background: stars >= 500 ? "#4caf50" : "#2196f3",
-                    transition: "0.4s ease",
+                    background: stars >= 500 
+                      ? "linear-gradient(90deg, #4caf50, #45a049)" 
+                      : "linear-gradient(90deg, #2196f3, #1976d2)",
+                    transition: "width 0.6s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "12px"
                   }}
-                />
+                >
+                  {starsPercent.toFixed(0)}%
+                </div>
               </div>
 
               {stars >= 500 && (
                 <div
                   style={{
-                    marginTop: "15px",
-                    padding: "12px 16px",
-                    background: "#4caf50",
+                    marginTop: "20px",
+                    padding: "16px 20px",
+                    background: "linear-gradient(135deg, #4caf50, #45a049)",
                     color: "white",
                     fontWeight: "bold",
-                    borderRadius: "8px",
+                    borderRadius: "10px",
                     textAlign: "center",
+                    fontSize: "16px",
+                    boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)"
                   }}
                 >
                   🎉 Mazal tov! You earned a 100₪ coupon for יש חסד!
@@ -208,189 +265,58 @@ function Myaccount() {
           </div>
         )}
 
-        {loading && <p>Loading your requests...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {loading && <p style={{ textAlign: "center", fontSize: "16px" }}>Loading...</p>}
+        {error && <p style={{ color: "red", textAlign: "center", fontWeight: "bold" }}>{error}</p>}
 
         {!loading && !error && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "40px",
-              marginTop: "20px",
-            }}
-          >
-            {/* 1. MY OPEN REQUESTS */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+            
             <div>
-              <h2>My open requests</h2>
-              {myOpenRequests.length === 0 && <p>You have no open requests.</p>}
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  overflowX: "auto",
-                  padding: "10px 0",
-                  scrollSnapType: "x mandatory",
-                }}
-              >
+              <h2 style={{ marginBottom: "15px", color: "#333" }}>My Open Requests</h2>
+              {myOpenRequests.length === 0 && <p style={{ color: "#666", fontStyle: "italic" }}>No open requests.</p>}
+              <div style={{ display: "flex", gap: "15px", overflowX: "auto", padding: "15px 0" }}>
                 {myOpenRequests.map((req) => (
-                  <div
-                    key={req._id}
-                    style={{
-                      minWidth: "220px",
-                      flex: "0 0 auto",
-                      border: "1px solid #ccc",
-                      borderRadius: "8px",
-                      padding: "10px",
-                      scrollSnapAlign: "start",
-                    }}
-                  >
-                    <strong>{req.title}</strong>
-                    <div>
-                      Posted: {new Date(req.createdAt).toLocaleString()}
-                    </div>
-                    <p>{req.description}</p>
-
+                  <div key={req._id} style={{ minWidth: "260px", flex: "0 0 auto", border: "1px solid #ddd", borderRadius: "10px", padding: "15px", background: "white", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
+                    <strong style={{ fontSize: "16px", color: "#2196f3" }}>{req.title}</strong>
+                    <div style={{ fontSize: "12px", color: "#999", marginTop: "5px" }}>Posted: {new Date(req.createdAt).toLocaleString()}</div>
+                    <p style={{ fontSize: "14px", marginTop: "10px", color: "#555" }}>{req.description}</p>
                     {req.completedBy ? (
-                      <button onClick={() => handleSolved(req._id)}>
-                        Solved
-                      </button>
+                      <button onClick={() => handleSolved(req._id)} style={{ marginTop: "10px", padding: "8px 16px", background: "#4caf50", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", width: "100%" }}>Mark as Solved</button>
                     ) : (
-                      <p style={{ fontSize: "12px", color: "#666" }}>
-                        No helper yet.
-                      </p>
+                      <p style={{ fontSize: "12px", color: "#666", marginTop: "10px", fontStyle: "italic" }}>No helper yet.</p>
                     )}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 2. REQUESTS I SOLVED FOR OTHERS */}
             <div>
-              <h2>Requests I solved for others</h2>
-              {mySolvedForOthers.length === 0 && (
-                <p>You have not completed any requests yet.</p>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  overflowX: "auto",
-                  padding: "10px 0",
-                  scrollSnapType: "x mandatory",
-                }}
-              >
+              <h2 style={{ marginBottom: "15px", color: "#333" }}>Requests I Solved</h2>
+              {mySolvedForOthers.length === 0 && <p style={{ color: "#666", fontStyle: "italic" }}>No completed requests.</p>}
+              <div style={{ display: "flex", gap: "15px", overflowX: "auto", padding: "15px 0" }}>
                 {mySolvedForOthers.map((req) => (
-                  <div
-                    key={req._id}
-                    style={{
-                      minWidth: "220px",
-                      flex: "0 0 auto",
-                      border: "1px solid #ccc",
-                      borderRadius: "8px",
-                      padding: "10px",
-                      scrollSnapAlign: "start",
-                    }}
-                  >
-                    <strong>{req.title}</strong>
-                    <div>
-                      Help seeker:{" "}
-                      {req.createdBy?.name || req.createdBy?.email || "Unknown"}
-                    </div>
-                    <div>
-                      Completed at:{" "}
-                      {new Date(
-                        req.updatedAt || req.createdAt
-                      ).toLocaleString()}
-                    </div>
-                    <p>{req.description}</p>
-
-                    {/* View chat (read-only) */}
-                    <button
-                      type="button"
-                      onClick={() => handleOpenChat(req)}
-                      style={{
-                        marginTop: "8px",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        border: "none",
-                        backgroundColor: "#555",
-                        color: "white",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      View chat
-                    </button>
+                  <div key={req._id} style={{ minWidth: "260px", flex: "0 0 auto", border: "1px solid #ddd", borderRadius: "10px", padding: "15px", background: "white", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
+                    <strong style={{ fontSize: "16px", color: "#ff9800" }}>{req.title}</strong>
+                    <div style={{ fontSize: "13px", color: "#666", marginTop: "5px" }}>Help seeker: {req.createdBy?.name || "Unknown"}</div>
+                    <div style={{ fontSize: "12px", color: "#999", marginTop: "3px" }}>Completed: {new Date(req.updatedAt || req.createdAt).toLocaleString()}</div>
+                    <p style={{ fontSize: "14px", marginTop: "10px", color: "#555" }}>{req.description}</p>
+                    <button type="button" onClick={() => handleOpenChat(req)} style={{ marginTop: "10px", padding: "8px 16px", borderRadius: "6px", border: "none", backgroundColor: "#555", color: "white", fontSize: "13px", cursor: "pointer", fontWeight: "bold", width: "100%" }}>View Chat</button>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* 3. REQUESTS I CREATED THAT ARE COMPLETED */}
             <div>
-              <h2>Requests I created that are completed</h2>
-              {myCompletedCreated.length === 0 && (
-                <p>You have no completed requests that you created.</p>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  overflowX: "auto",
-                  padding: "10px 0",
-                  scrollSnapType: "x mandatory",
-                }}
-              >
+              <h2 style={{ marginBottom: "15px", color: "#333" }}>My Completed Requests</h2>
+              {myCompletedCreated.length === 0 && <p style={{ color: "#666", fontStyle: "italic" }}>No completed requests.</p>}
+              <div style={{ display: "flex", gap: "15px", overflowX: "auto", padding: "15px 0" }}>
                 {myCompletedCreated.map((req) => (
-                  <div
-                    key={req._id}
-                    style={{
-                      minWidth: "220px",
-                      flex: "0 0 auto",
-                      border: "1px solid #ccc",
-                      borderRadius: "8px",
-                      padding: "10px",
-                      scrollSnapAlign: "start",
-                    }}
-                  >
-                    <strong>{req.title}</strong>
-                    <div>
-                      Helper:{" "}
-                      {req.completedBy?.name ||
-                        req.completedBy?.email ||
-                        "Unknown"}
-                    </div>
-                    <div>
-                      Completed at:{" "}
-                      {new Date(
-                        req.updatedAt || req.createdAt
-                      ).toLocaleString()}
-                    </div>
-                    <p>{req.description}</p>
-
-                    {/* View chat (read-only) */}
-                    <button
-                      type="button"
-                      onClick={() => handleOpenChat(req)}
-                      style={{
-                        marginTop: "8px",
-                        padding: "6px 12px",
-                        borderRadius: "6px",
-                        border: "none",
-                        backgroundColor: "#555",
-                        color: "white",
-                        fontSize: "12px",
-                        cursor: "pointer",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      View chat
-                    </button>
+                  <div key={req._id} style={{ minWidth: "260px", flex: "0 0 auto", border: "1px solid #ddd", borderRadius: "10px", padding: "15px", background: "white", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }}>
+                    <strong style={{ fontSize: "16px", color: "#9c27b0" }}>{req.title}</strong>
+                    <div style={{ fontSize: "13px", color: "#666", marginTop: "5px" }}>Helper: {req.completedBy?.name || "Unknown"}</div>
+                    <div style={{ fontSize: "12px", color: "#999", marginTop: "3px" }}>Completed: {new Date(req.updatedAt || req.createdAt).toLocaleString()}</div>
+                    <p style={{ fontSize: "14px", marginTop: "10px", color: "#555" }}>{req.description}</p>
+                    <button type="button" onClick={() => handleOpenChat(req)} style={{ marginTop: "10px", padding: "8px 16px", borderRadius: "6px", border: "none", backgroundColor: "#555", color: "white", fontSize: "13px", cursor: "pointer", fontWeight: "bold", width: "100%" }}>View Chat</button>
                   </div>
                 ))}
               </div>
@@ -399,7 +325,6 @@ function Myaccount() {
         )}
       </div>
 
-      {/* Read-only chat popup for completed mitzvot */}
       {isChatOpen && activeChat && (
         <ChatWindow
           chatId={activeChat.chatId}
