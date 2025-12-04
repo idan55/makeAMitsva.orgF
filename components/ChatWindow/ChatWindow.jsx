@@ -1,6 +1,6 @@
 // components/ChatWindow/ChatWindow.jsx
 import React, { useEffect, useRef, useState } from "react";
-import "./ChatWindow.css"
+import "./ChatWindow.css";
 
 const API_URL = "http://localhost:4000/api";
 
@@ -14,7 +14,7 @@ function ChatWindow({
   onNewMessage,
   visible = true,
 }) {
-  const [messages, setMessages] = useState([]); // always array
+  const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -25,14 +25,23 @@ function ChatWindow({
   const lastOtherMessageRef = useRef(null);
   const initialLoadRef = useRef(true);
 
-  // Scroll to bottom whenever messages change
+  const currentUserId = currentUser?._id || currentUser?.id;
+
+  // Demande la permission de notification au chargement
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Scroll automatique
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
-  // Load messages + poll
+  // Charger les messages + polling
   useEffect(() => {
     if (!chatId) return;
 
@@ -100,18 +109,13 @@ function ChatWindow({
     fetchMessages({ initial: true });
     intervalId = setInterval(() => fetchMessages({ initial: false }), 800);
 
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, [chatId]);
 
-  async function sendMessage({ textToSend, attachments = [] }) {
-    if (!textToSend.trim() && attachments.length === 0) return;
-
-    // 🔒 If read-only: do nothing
-    if (isReadOnly) {
-      return;
-    }
+  // Envoyer un message
+  async function handleSend(e) {
+    e.preventDefault();
+    if (!text.trim() || isReadOnly) return;
 
     try {
       setSending(true);
@@ -148,83 +152,41 @@ function ChatWindow({
     }
   }
 
-  async function handleSend(e) {
-    e.preventDefault();
-    await sendMessage({ textToSend: text, attachments: [] });
-  }
+  // Notifications pour nouveaux messages des autres
+  useEffect(() => {
+    if (!messages || messages.length === 0) return;
 
-  async function handleFileChange(e) {
-    const file = e.target.files?.[0];
-    if (!file || !chatId) return;
+    const lastMessage = messages[messages.length - 1];
+    const senderId = lastMessage?.sender?._id || lastMessage?.sender;
 
-    // Reset input so same file can be selected again
-    e.target.value = "";
-
-    try {
-      setUploading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const token = localStorage.getItem("token");
-      const uploadRes = await fetch(`${API_URL}/chats/${chatId}/attachments`, {
-        method: "POST",
-        headers: {
-          Authorization: token ? `Bearer ${token}` : undefined,
-        },
-        body: formData,
-      });
-
-      const uploadData = await uploadRes.json();
-      if (!uploadRes.ok) {
-        throw new Error(uploadData.error || "Upload failed");
+    if (senderId && senderId !== currentUserId) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("New message", {
+          body: lastMessage.text,
+        });
       }
-
-      await sendMessage({
-        textToSend: "",
-        attachments: [
-          {
-            url: uploadData.url,
-            type: uploadData.type,
-            publicId: uploadData.publicId,
-            originalName: uploadData.originalName,
-          },
-        ],
-      });
-    } catch (err) {
-      console.error("Attachment upload error:", err);
-      alert(err.message || "Failed to send attachment");
-    } finally {
-      setUploading(false);
     }
-  }
+  }, [messages, currentUserId]);
 
-  const safeMessages = Array.isArray(messages) ? messages : [];
-
-  const currentUserId = currentUser?._id || currentUser?.id;
-
+  // Déterminer le nom de l'autre utilisateur
   let otherUserName =
-    otherUser?.name || otherUser?.firstname || otherUser?.email || null;
+    otherUser?.name || otherUser?.firstname || otherUser?.email || "User";
 
-  // If no name from props, try derive from messages
-  if (!otherUserName && safeMessages.length > 0) {
-    const otherMsg = safeMessages.find((msg) => {
-      const senderId =
-        typeof msg.sender === "string" ? msg.sender : msg.sender?._id;
+  if (!otherUserName && messages.length > 0) {
+    const otherMsg = messages.find((msg) => {
+      const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id;
       return senderId && senderId !== currentUserId;
     });
-
-    if (otherMsg && otherMsg.sender) {
+    if (otherMsg?.sender) {
       otherUserName =
         otherMsg.sender.name ||
         otherMsg.sender.firstname ||
         otherMsg.sender.email ||
-        null;
+        "User";
     }
   }
 
-  if (!otherUserName) {
-    otherUserName = "User";
-  }
+  const safeMessages = Array.isArray(messages) ? messages : [];
 
   return (
     <div
@@ -260,17 +222,9 @@ function ChatWindow({
         )}
 
         {safeMessages.map((msg, index) => {
-          const senderId =
-            typeof msg.sender === "string" ? msg.sender : msg.sender?._id;
-
-          const isMine =
-            senderId &&
-            (senderId === currentUser?._id || senderId === currentUser?.id);
-
-          const senderName =
-            msg.sender?.name ||
-            msg.sender?.firstname ||
-            (isMine ? "You" : otherUserName);
+          const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id;
+          const isMine = senderId && senderId === currentUserId;
+          const senderName = isMine ? "You" : otherUserName;
 
           return (
             <div
@@ -316,7 +270,6 @@ function ChatWindow({
             </div>
           );
         })}
-
         <div ref={messagesEndRef} />
       </div>
 
