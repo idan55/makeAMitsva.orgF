@@ -1,20 +1,30 @@
 /* Basic Messenger-style chat window */
 
 .chat-window {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    width: 320px;
-    max-height: 420px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    z-index: 9999;
-  }
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 320px;
+  max-height: 420px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  z-index: 9999;
+  transition: all 0.2s ease;
+}
+
+.chat-window.expanded {
+  width: 80vw;
+  max-width: 960px;
+  height: 70vh;
+  max-height: 80vh;
+  bottom: 10vh;
+  right: 10vw;
+}
   
   .chat-header {
     background: #0084ff;
@@ -110,6 +120,25 @@
     font-size: 14px;
     padding: 6px;
   }
+
+  .chat-attach {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 6px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  .chat-attach.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
+  }
+  
+  .chat-attach input {
+    display: none;
+  }
   
   .chat-input-area button {
     margin-left: 6px;
@@ -125,5 +154,48 @@
   .chat-input-area button:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+  
+  .chat-attachments {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .chat-attachment img,
+  .chat-attachment video {
+    max-width: 200px;
+    max-height: 160px;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .chat-toggle {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .chat-preview-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    cursor: zoom-out;
+  }
+
+  .chat-preview-overlay img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
   }
   
