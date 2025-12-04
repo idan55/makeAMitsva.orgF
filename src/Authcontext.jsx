@@ -1,52 +1,60 @@
-// src/Authcontext.jsx
-import { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext } from 'react';
 
+// Créer le contexte
 export const AuthContext = createContext();
 
-const API_URL = "http://localhost:4000/api"; // <--- IMPORTANT !!
+// Hook personnalisé pour utiliser le contexte
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
 
-export function AuthProvider({ children }) {
+// Provider
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
+  // Charger l'utilisateur depuis localStorage au démarrage
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    // Fetch correct user from backend
-    fetch(`${API_URL}/users/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch user");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.user) {
-          setUser(data.user);
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-      })
-      .catch(() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-      });
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
+    
+    if (storedUser && storedToken) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        console.log('🔄 Restored user from localStorage:', parsedUser);
+        setUser(parsedUser);
+      } catch (err) {
+        console.error('Error parsing user from localStorage:', err);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
+    }
   }, []);
 
-  const login = (data) => {
-    if (!data || !data.user || !data.token) return;
-
-    setUser(data.user);
-
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+  const login = (userData) => {
+    console.log('🔐 Login called with:', userData);
+    
+    // Si userData contient { user, token }
+    if (userData.user && userData.token) {
+      setUser(userData.user);
+      localStorage.setItem('user', JSON.stringify(userData.user));
+      localStorage.setItem('token', userData.token);
+    } 
+    // Si userData est directement l'objet user
+    else {
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+    }
   };
 
   const logout = () => {
+    console.log('🚪 Logout called');
     setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
@@ -54,9 +62,4 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-// Custom hook
-export function useAuth() {
-  return useContext(AuthContext);
-}
+};
