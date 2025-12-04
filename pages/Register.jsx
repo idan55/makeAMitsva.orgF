@@ -61,27 +61,34 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     const pwdError = validatePassword(password);
     if (pwdError) {
       setFeedback("Password error: " + pwdError);
       return;
     }
+    
     if (!profileImage) {
       setFeedback("Please upload a profile image.");
       return;
     }
-
+  
     try {
+      // ✅ Vérifie que profileImage contient bien l'URL
+      console.log("📤 Sending profileImage:", profileImage); // Debug
+      
       const userData = { name, age, email, password, phone, profileImage };
-      await registerUser(userData);
-
+      const registerResponse = await registerUser(userData);
+      
+      console.log("✅ Register response:", registerResponse); // Debug
+  
       const loginData = await LoginUser({ email, password });
-      login(loginData);
-
+      login(loginData.user); // ✅ Correction ici aussi
+  
       setFeedback("Account created and logged in!");
       setTimeout(() => navigate("/"), 1000);
     } catch (err) {
-      console.error(err);
+      console.error("❌ Registration error:", err);
       setFeedback(err.message || "Registration failed");
     }
   };
