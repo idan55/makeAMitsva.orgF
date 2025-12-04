@@ -37,53 +37,61 @@ function Register() {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
+  
+    console.log("📤 File selected:", file.name); // ✅ Debug
     setIsUploading(true);
     const formData = new FormData();
     formData.append("image", file);
-
+  
     try {
+      console.log("📤 Sending to /api/upload..."); // ✅ Debug
+      
       const res = await fetch("http://localhost:4000/api/upload", {
         method: "POST",
         body: formData,
       });
+      
+      console.log("📥 Response status:", res.status); // ✅ Debug
+      
       if (!res.ok) throw new Error("Upload failed");
+      
       const data = await res.json();
+      console.log("✅ Cloudinary URL received:", data.url); // ✅ Debug
+      
       setProfileImage(data.url);
-      setFeedback("Image uploaded successfully");
+      console.log("🔹 profileImage juste après upload:", data.url);
+
+      setFeedback("Image uploaded successfully ✅");
     } catch (err) {
-      console.error(err);
+      console.error("❌ Upload error:", err);
       setFeedback("Error uploading image");
     } finally {
       setIsUploading(false);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
     const pwdError = validatePassword(password);
     if (pwdError) {
       setFeedback("Password error: " + pwdError);
       return;
     }
-    
+  
     if (!profileImage) {
       setFeedback("Please upload a profile image.");
       return;
     }
   
     try {
-      // ✅ Vérifie que profileImage contient bien l'URL
-      console.log("📤 Sending profileImage:", profileImage); // Debug
-      
       const userData = { name, age, email, password, phone, profileImage };
-      const registerResponse = await registerUser(userData);
-      
-      console.log("✅ Register response:", registerResponse); // Debug
   
-      const loginData = await LoginUser({ email, password });
-      login(loginData.user); // ✅ Correction ici aussi
+      // 🔹 Inscription + récupération token + user
+      const registerResponse = await registerUser(userData);
+      console.log("✅ Register response:", registerResponse);
+  
+      // 🔹 Login automatique avec token + user
+      login(registerResponse);
   
       setFeedback("Account created and logged in!");
       setTimeout(() => navigate("/"), 1000);
@@ -92,7 +100,7 @@ function Register() {
       setFeedback(err.message || "Registration failed");
     }
   };
-
+  
   return (
     <div className="page-container">
       <Header />
