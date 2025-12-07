@@ -10,6 +10,7 @@ import {
   getNearbyRequests,
   wantToHelpRequest,
   completeRequest,
+  getMe,
 } from "../src/Api";
 import { useAuth } from "../src/Authcontext";
 
@@ -26,8 +27,10 @@ function Home() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  const [banFlashActive, setBanFlashActive] = useState(false);
+  const [showBanSupport, setShowBanSupport] = useState(false);
 
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, login } = useAuth();
 
   const [activeChat, setActiveChat] = useState(null); // { chatId, otherUser, requestTitle }
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -46,6 +49,21 @@ function Home() {
 
   const itemRefs = useRef({}); // refs for scrolling to a request
 
+  // Refresh user from backend to catch ban/unban without reload
+  const refreshUserFromServer = async (token) => {
+    try {
+      const fresh = await getMe(token);
+      if (fresh) {
+        login({ user: fresh, token });
+        localStorage.setItem("user", JSON.stringify(fresh));
+      }
+      return fresh;
+    } catch (err) {
+      console.error("Failed to refresh user state:", err);
+      return currentUser;
+    }
+  };
+
   // Create a request
   async function handleCreateRequest(e) {
     e.preventDefault();
@@ -53,6 +71,12 @@ function Home() {
 
     if (!token) {
       alert("You must be logged in to create a request");
+      return;
+    }
+
+    const freshUser = await refreshUserFromServer(token);
+    if (freshUser?.isBanned) {
+      setError("Your account is banned. Please contact support to unban: makeamitsva@gmail.com");
       return;
     }
 
@@ -74,6 +98,13 @@ function Home() {
         token,
       }); // { message, request }
 
+      // If backend now flags banned mid-flight, stop and show message
+      const updatedBanState = data?.user?.isBanned ?? data?.isBanned ?? freshUser?.isBanned;
+      if (updatedBanState) {
+        setError("Your account is banned. Please contact support to unban: makeamitsva@gmail.com");
+        return;
+      }
+
       setRequests((prev) => [...prev, data.request]);
       setTitle("");
       setDescription("");
@@ -94,9 +125,22 @@ function Home() {
       return;
     }
 
+    const freshUser = await refreshUserFromServer(token);
+    if (freshUser?.isBanned) {
+      setError("Your account is banned. Please contact support to unban: makeamitsva@gmail.com");
+      return;
+    }
+
     try {
       setError("");
       const data = await wantToHelpRequest(requestId, token);
+
+      const updatedBanState = data?.user?.isBanned ?? data?.isBanned ?? freshUser?.isBanned;
+      if (updatedBanState) {
+        setError("Your account is banned. Please contact support to unban: makeamitsva@gmail.com");
+        return;
+      }
+
       setRequests((prev) =>
         prev.map((r) => (r._id === requestId ? data.request : r))
       );
@@ -148,7 +192,7 @@ function Home() {
     );
   }, []);
 
-  // Fetch nearby requests on location/radius and poll to reduce manual refresh
+  // Fetch nearby requests on location/radius/user-age change and poll to reduce manual refresh
   useEffect(() => {
     let timer;
 
@@ -180,7 +224,25 @@ function Home() {
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [userPos, radiusKm]);
+    // include currentUser?.age so age changes show up immediately on request cards
+  }, [userPos, radiusKm, currentUser?.age]);
+
+  // Trigger banned popup sequence
+  useEffect(() => {
+    let timer;
+    if (currentUser?.isBanned) {
+      setShowBanSupport(false);
+      setBanFlashActive(true);
+      timer = setTimeout(() => {
+        setBanFlashActive(false);
+        setShowBanSupport(true);
+      }, 3000);
+    } else {
+      setBanFlashActive(false);
+      setShowBanSupport(false);
+    }
+    return () => timer && clearTimeout(timer);
+  }, [currentUser?.isBanned]);
 
   // Poll chats list for notifications even when chat not opened
   useEffect(() => {
@@ -381,6 +443,73 @@ function Home() {
       <Header />
       <div className="content">
         <h2>Nearby Mitzvot</h2>
+
+        {currentUser?.isBanned && (
+          <div
+            style={{
+              margin: "12px 0",
+              padding: "12px 14px",
+              background: "#ffebee",
+              color: "#c62828",
+              border: "1px solid #ef9a9a",
+              borderRadius: "8px",
+              fontWeight: "bold",
+            }}
+          >
+            Your account is banned. Please contact support to unban: makeamitsva@gmail.com
+          </div>
+        )}
+
+        {currentUser?.isBanned && banFlashActive && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(255, 0, 0, 0.85)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              color: "white",
+              fontSize: "64px",
+              fontWeight: "900",
+              textShadow: "0 0 16px rgba(0,0,0,0.6)",
+              animation: "banFlash 0.6s ease-in-out infinite",
+              textTransform: "uppercase",
+            }}
+          >
+            BANNED!
+            <style>
+              {`@keyframes banFlash {
+                0% { opacity: 1; }
+                50% { opacity: 0.2; }
+                100% { opacity: 1; }
+              }`}
+            </style>
+          </div>
+        )}
+
+        {currentUser?.isBanned && showBanSupport && !banFlashActive && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(255, 255, 255, 0.9)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9998,
+              color: "#c62828",
+              fontSize: "28px",
+              fontWeight: "800",
+              padding: "40px",
+              textAlign: "center",
+              lineHeight: 1.4,
+            }}
+          >
+            Please contact support to unban: makeamitsva@gmail.com
+          </div>
+        )}
 
         {/* Radius slider */}
         <div style={{ marginBottom: "20px" }}>

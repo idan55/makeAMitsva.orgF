@@ -29,11 +29,22 @@ function Login() {
       login(data);          // pass the whole data object
       navigate("/");        // go directly to home page
       // setMessage("Utilisateur connecté"); // optional, not needed if we navigate
-      login(data);          // pass the whole data object
-      navigate("/");        // go directly to home page
-      // setMessage("Utilisateur connecté"); // optional, not needed if we navigate
     } catch (err) {
-      setError(err.message || "Login failed");
+      const msg = (err?.message || "").toLowerCase();
+      const status = err?.status;
+      if (
+        status === 404 ||
+        status === 410 ||
+        msg.includes("deleted") ||
+        msg.includes("removed") ||
+        msg.includes("not found")
+      ) {
+        setError("Your account has been deleted. Please contact support at makeamitsva@gmail.com if this is unexpected.");
+      } else if (msg.includes("banned")) {
+        setError("Your account is banned. Please contact support at makeamitsva@gmail.com.");
+      } else {
+        setError(err.message || "Login failed");
+      }
     } finally {
       setLoading(false);
     }

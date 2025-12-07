@@ -39,7 +39,9 @@ export async function LoginUser({ email, password }) {
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error || "Login failed");
+    const error = new Error(data.error || "Login failed");
+    error.status = res.status;
+    throw error;
   }
 
   return data; // { message, token, user }
@@ -91,7 +93,7 @@ export async function adminBanUser(id, token) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to ban user");
-  return data.user;
+  return data.user || data.updatedUser || data.data || data; // accept any shape backend returns
 }
 
 export async function adminUnbanUser(id, token) {
@@ -101,17 +103,7 @@ export async function adminUnbanUser(id, token) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to unban user");
-  return data.user;
-}
-
-export async function adminDeleteUser(id, token) {
-  const res = await fetch(`${API_URL}/admin/users/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || "Failed to delete user");
-  return data;
+  return data.user || data.updatedUser || data.data || data;
 }
 
 export async function adminGetRequests(token) {

@@ -71,12 +71,37 @@ function Register() {
       setIsUploading(false);
     }
   };
+
+  const handlePhoneChange = (e) => {
+    const value = e.target.value;
+    setPhone(value);
+
+    if (!value) {
+      setPhoneError("");
+      return;
+    }
+
+    const normalized = normalizeIsraeliPhone(value);
+    setPhoneError(
+      normalized
+        ? ""
+        : "Please enter a valid Israeli mobile number (e.g. +9725XXXXXXXX)"
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     const pwdError = validatePassword(password);
     if (pwdError) {
       setFeedback("Password error: " + pwdError);
+      return;
+    }
+
+    const normalizedPhone = normalizeIsraeliPhone(phone);
+    if (!normalizedPhone) {
+      setPhoneError("Please enter a valid Israeli mobile number.");
+      setFeedback("Please enter a valid Israeli mobile number.");
       return;
     }
   
@@ -86,18 +111,26 @@ function Register() {
     }
   
     try {
-      const userData = { name, age, email, password, phone, profileImage };
+      const userData = {
+        name,
+        age,
+        email,
+        password,
+        phone: normalizedPhone,
+        profileImage,
+      };
   
       // 🔹 Inscription + récupération token + user
       const registerResponse = await registerUser(userData);
       console.log("✅ Register response:", registerResponse);
-  
-      // 🔹 Login automatique avec token + user
-      login(registerResponse);
-  
+
+      // 🔹 Login automatique pour récupérer token + user
+      const loginResponse = await LoginUser({ email, password });
+      login(loginResponse);
+
       setPhone(normalizedPhone); // reflect the normalized number in the form
       setFeedback("Account created and logged in!");
-      setTimeout(() => navigate("/"), 500);
+      navigate("/"); // go straight to the map/home
     } catch (err) {
       console.error("❌ Registration error:", err);
       setFeedback(err.message || "Registration failed");

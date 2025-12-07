@@ -6,7 +6,6 @@ import {
   adminGetUsers,
   adminBanUser,
   adminUnbanUser,
-  adminDeleteUser,
   adminGetRequests,
   adminDeleteRequest,
 } from "../src/Api";
@@ -56,30 +55,52 @@ function Admin() {
   }
 
   async function handleBan(id) {
+    const freshToken = localStorage.getItem("token");
     try {
-      const updated = await adminBanUser(id, token);
-      setUsers((prev) => prev.map((u) => (u._id === id ? updated : u)));
+      const updated = await adminBanUser(id, freshToken);
+      if (updated && (updated._id || updated.id)) {
+        const updatedId = updated._id || updated.id;
+        setUsers((prev) =>
+          prev.map((u) =>
+            u._id === updatedId || u.id === updatedId || u._id === id
+              ? { ...u, ...updated }
+              : u
+          )
+        );
+      }
+      // Always refetch to mirror backend truth (covers cases where response is sparse)
+      const usersData = await adminGetUsers(freshToken);
+      setUsers(usersData);
     } catch (err) {
       alert(err.message || "Failed to ban user");
     }
   }
 
   async function handleUnban(id) {
+    const freshToken = localStorage.getItem("token");
     try {
-      const updated = await adminUnbanUser(id, token);
-      setUsers((prev) => prev.map((u) => (u._id === id ? updated : u)));
+      const updated = await adminUnbanUser(id, freshToken);
+      if (updated && (updated._id || updated.id)) {
+        const updatedId = updated._id || updated.id;
+        setUsers((prev) =>
+          prev.map((u) =>
+            u._id === updatedId || u.id === updatedId || u._id === id
+              ? { ...u, ...updated }
+              : u
+          )
+        );
+      }
+      // Always refetch to ensure we mirror the backend state
+      const usersData = await adminGetUsers(freshToken);
+      setUsers(usersData);
     } catch (err) {
+      // Fallback: if backend didn't return user, toggle locally for UX
+      setUsers((prev) =>
+        prev.map((u) =>
+          u._id === id || u.id === id ? { ...u, isBanned: false } : u
+        )
+      );
       alert(err.message || "Failed to unban user");
-    }
-  }
-
-  async function handleDeleteUser(id) {
-    if (!window.confirm("Delete this user?")) return;
-    try {
-      await adminDeleteUser(id, token);
-      setUsers((prev) => prev.filter((u) => u._id !== id));
-    } catch (err) {
-      alert(err.message || "Failed to delete user");
     }
   }
 
@@ -109,7 +130,7 @@ function Admin() {
                 <div>
                   <div><strong>{u.name}</strong> ({u.email})</div>
                   <div style={{ fontSize: "12px", color: "#555" }}>
-                    Role: {u.role} · {u.isBanned ? "BANNED" : "Active"}
+                    Role: {u.role} · {u.isBanned ? "BANNED — contact support to unban: makeamitsva@gmail.com" : "Active"}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
@@ -122,9 +143,6 @@ function Admin() {
                       Unban
                     </button>
                   )}
-                  <button onClick={() => handleDeleteUser(u._id)} style={{ background: "#757575", color: "#fff", border: "none", padding: "6px 10px", borderRadius: "6px" }}>
-                    Delete
-                  </button>
                 </div>
               </div>
             ))}

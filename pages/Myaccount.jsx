@@ -75,11 +75,12 @@ function Myaccount() {
       }
     }
 
-    loadData(true);
+    loadData(true); // run immediately on mount AND whenever user/token changes
     timer = setInterval(() => loadData(false), 8000);
     return () => {
       if (timer) clearInterval(timer);
     };
+    // Rerun when user changes so updated fields (like age) appear immediately.
   }, []);
 
   async function handleSolved(requestId) {
