@@ -9,7 +9,12 @@ function Header() {
 
   return (
     <header style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-      <NavLink to="/" style={{ marginRight: "20px", textDecoration: "none", color: "inherit" }}>
+      <NavLink to="/" style={{ display: "flex", alignItems: "center", gap: "10px", marginRight: "20px", textDecoration: "none", color: "inherit" }}>
+        <img
+          src="/logo.png"
+          alt="Make A Mitsva logo"
+          style={{ width: "42px", height: "42px", objectFit: "contain" }}
+        />
         <h1 style={{ margin: 0 }}>Make A Mitsva</h1>
       </NavLink>
 
