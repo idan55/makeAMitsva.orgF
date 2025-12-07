@@ -2,12 +2,19 @@
 // API base is driven by env var. Use Vite's import.meta for frontend and fallback to process.env for tooling.
 const API_URL =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL_ENV) ||
-  (typeof process !== "undefined" && process.env?.API_URL_ENV) ||
+  (typeof process !== "undefined" && process.env?.VITE_API_URL_ENV) ||
   "http://localhost:4000/api";
 
 // ---------- USER API ----------
 
-export async function registerUser({ name, age, email, password, phone, profileImage }) {
+export async function registerUser({
+  name,
+  age,
+  email,
+  password,
+  phone,
+  profileImage,
+}) {
   const res = await fetch(`${API_URL}/users/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
