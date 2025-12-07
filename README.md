@@ -1,6 +1,6 @@
 # Make A Mitsva – Frontend
 
-React + Vite single-page app for MakeAMitsva.org. Users can register, log in, view nearby mitzvot on a map, create requests, volunteer to help, chat, and admins can ban/unban users and moderate requests.
+React + Vite single-page app for MakeAMitsva.org. Users can register, log in, view nearby mitzvot on a Mapbox map, create requests, volunteer to help, chat, and admins can ban/unban users and moderate requests.
 
 ## Quick Start
 - Install: `npm install`
@@ -8,12 +8,12 @@ React + Vite single-page app for MakeAMitsva.org. Users can register, log in, vi
 - Build: `npm run build`
 - Preview build: `npm run preview`
 
-Backend is expected at `http://localhost:4000/api` (config in `src/Api.js`); image uploads hit `/api/upload`.
+Backend base URL is read from `VITE_API_URL_ENV` (fallback `http://localhost:4000/api`); image uploads hit `/api/upload`.
 
 ## Key Features
 - **Auth**: Register, login, auto-login after signup, persistent tokens in localStorage.
 - **Bans**: Banned users are blocked from creating/helping requests; loud red “BANNED!” overlay + support email. Admins can ban/unban; frontend revalidates ban state before actions.
-- **Requests & Map**: Nearby requests via geolocation; create requests; claim/help; mark complete; map + scroll list with selection sync.
+- **Requests & Map**: Nearby requests via geolocation; create requests; claim/help; mark complete; Mapbox map + scroll list with selection sync.
 - **Chat**: Start and continue chats per request; notifications and unread handling.
 - **Profile**: My Account shows profile, stars progress, profile image upload to Cloudinary via backend.
 - **Admin**: View users/requests, ban/unban users, delete requests. User deletion is intentionally disabled.
@@ -26,8 +26,16 @@ Backend is expected at `http://localhost:4000/api` (config in `src/Api.js`); ima
 ## Tech Stack
 - React 19, Vite, React Router
 - Fetch-based API client (`src/Api.js`)
-- Map via Leaflet/Mapbox (see `components/Map`)
+- Map via Mapbox GL (`components/Map`)
 - Styling mostly inline/CSS in `src/App.css`
+
+## Environment
+Create a `.env` file (not committed) with:
+
+```
+VITE_API_URL_ENV=http://localhost:4000/api
+VITE_MAPBOX_TOKEN=your_mapbox_token
+```
 
 ## Project Structure (high level)
 - `src/Api.js` – API calls to backend

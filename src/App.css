@@ -57,6 +57,28 @@ header a:hover {
   justify-content: space-between;
 }
 
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  margin-right: 10px;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.social-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.social-icons {
+  display: flex;
+  align-items: center;
+}
+
 /* ===== Main content ===== */
 
 .content {
@@ -157,6 +179,42 @@ form button[type="submit"]:disabled {
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
+}
+
+/* ===== Responsive tweaks ===== */
+@media (max-width: 900px) {
+  header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  header h1 {
+    font-size: 1.2rem;
+  }
+
+  .map-window-wrapper {
+    flex-direction: column;
+  }
+
+  .map-wrapper,
+  .window-wrapper {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .site-footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .social-link {
+    margin-right: 6px;
+  }
+
+  .content {
+    padding: 16px;
+  }
 }
 
 /* Make Mapbox popup close (×) more visible */

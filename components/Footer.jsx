@@ -1,16 +1,29 @@
 
 import React from 'react';
-import { FaFacebook, FaTwitter, FaGithub } from "react-icons/fa"; 
+import { FaGithub, FaEnvelope } from "react-icons/fa"; 
 
 function Footer() {
   return (
     <footer className="site-footer">
       <div className="social-icons">
-        <FaFacebook size={30} color="#1877F2" />
-        <FaTwitter size={30} color="#1DA1F2" />
-        <FaGithub size={30} color="#000" />
+        <a
+          href="https://github.com/idan55/makeAMitsva.orgF"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="GitHub repository"
+          className="social-link"
+        >
+          <FaGithub size={28} color="#000" />
+        </a>
+        <a
+          href="mailto:makeamitsva@gmail.com"
+          aria-label="Email support"
+          className="social-link"
+        >
+          <FaEnvelope size={28} color="#d97706" />
+        </a>
       </div>
-      <p className="footer-text">© 2025 My Website. All rights reserved.</p>
+      <p className="footer-text">© 2025 Make-A-Mitsva.org --- All rights reserved.</p>
     </footer>
   );
 }
