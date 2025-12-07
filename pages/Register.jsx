@@ -13,7 +13,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [age, setAge] = useState("");
   const [profileImage, setProfileImage] = useState(""); 
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState(null);
   const [error, setError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -63,10 +63,10 @@ function Register() {
       setProfileImage(data.url);
       console.log("🔹 profileImage juste après upload:", data.url);
 
-      setFeedback("Image uploaded successfully ✅");
+      setFeedback({ type: "success", text: "Image uploaded successfully ✅" });
     } catch (err) {
       console.error("❌ Upload error:", err);
-      setFeedback("Error uploading image");
+      setFeedback({ type: "error", text: "Error uploading image" });
     } finally {
       setIsUploading(false);
     }
@@ -94,19 +94,19 @@ function Register() {
   
     const pwdError = validatePassword(password);
     if (pwdError) {
-      setFeedback("Password error: " + pwdError);
+      setFeedback({ type: "error", text: "Password error: " + pwdError });
       return;
     }
 
     const normalizedPhone = normalizeIsraeliPhone(phone);
     if (!normalizedPhone) {
       setPhoneError("Please enter a valid Israeli mobile number.");
-      setFeedback("Please enter a valid Israeli mobile number.");
+      setFeedback({ type: "error", text: "Please enter a valid Israeli mobile number." });
       return;
     }
   
     if (!profileImage) {
-      setFeedback("Please upload a profile image.");
+      setFeedback({ type: "error", text: "Please upload a profile image." });
       return;
     }
   
@@ -129,11 +129,11 @@ function Register() {
       login(loginResponse);
 
       setPhone(normalizedPhone); // reflect the normalized number in the form
-      setFeedback("Account created and logged in!");
+      setFeedback({ type: "success", text: "Account created and logged in!" });
       navigate("/"); // go straight to the map/home
     } catch (err) {
       console.error("❌ Registration error:", err);
-      setFeedback(err.message || "Registration failed");
+      setFeedback({ type: "error", text: err.message || "Registration failed" });
     }
   };
   
@@ -143,6 +143,7 @@ function Register() {
       <div className="content" style={{ maxWidth: "500px", margin: "40px auto", padding: "20px", background: "#f9f9f9", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
           <h1 style={{ textAlign: "center" }}>Register</h1>
+          <style>{`.auth-message{ text-align:center; font-weight:bold; margin-bottom:10px; }`}</style>
 
           <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} required style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
           <input type="number" placeholder="Age" value={age} onChange={e => setAge(e.target.value)} required min={16} max={120} style={{ padding: "10px", borderRadius: "6px", border: "1px solid #ccc" }} />
@@ -176,7 +177,16 @@ function Register() {
             Register
           </button>
 
-          {feedback && <p style={{ color: feedback.includes("error") ? "red" : "green", textAlign: "center", fontWeight: "bold" }}>{feedback}</p>}
+          {feedback && (
+            <p
+              className="auth-message"
+              style={{
+                color: feedback.type === "error" ? "red" : "green",
+              }}
+            >
+              {feedback.text}
+            </p>
+          )}
         </form>
       </div>
       <Footer />

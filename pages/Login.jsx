@@ -50,6 +50,12 @@ function Login() {
     }
   };
 
+  const baseMessageStyle = {
+    textAlign: "center",
+    fontWeight: "bold",
+    marginBottom: "10px",
+  };
+
   return (
     <div className="page-container">
       <Header />
@@ -58,8 +64,8 @@ function Login() {
         <form className="sign-in-form" onSubmit={handleSubmit}>
           <h1>Login</h1>
 
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          {message && <p style={{ color: "green" }}>{message}</p>}
+          {error && <p style={{ ...baseMessageStyle, color: "red" }}>{error}</p>}
+          {message && <p style={{ ...baseMessageStyle, color: "green" }}>{message}</p>}
 
           <label htmlFor="email">E-mail</label>
           <input
