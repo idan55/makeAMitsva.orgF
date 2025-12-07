@@ -36,16 +36,53 @@ function Register() {
   };
 
   // Upload image
+  const compressImage = (file, maxDim = 1200, quality = 0.7) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height >= width && height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return reject(new Error("Compression failed"));
+              resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" }));
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
   
     console.log("📤 File selected:", file.name); // ✅ Debug
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("image", file);
-  
     try {
+      const workingFile =
+        file.size > 5 * 1024 * 1024 ? await compressImage(file) : file;
+
+      const formData = new FormData();
+      formData.append("image", workingFile);
       console.log("📤 Sending to /api/upload..."); // ✅ Debug
       
       const res = await fetch("http://localhost:4000/api/upload", {

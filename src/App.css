@@ -217,6 +217,38 @@ form button[type="submit"]:disabled {
   }
 }
 
+@media (max-width: 640px) {
+  header {
+    padding: 12px 16px;
+  }
+
+  header a {
+    margin-right: 8px;
+  }
+
+  .map-container-style {
+    min-height: 300px;
+    height: 60vh !important;
+  }
+
+  form,
+  .window-wrapper {
+    box-shadow: none;
+  }
+
+  .content {
+    padding: 12px;
+  }
+}
+
+/* Prevent mobile zoom on inputs */
+input,
+textarea,
+button,
+select {
+  font-size: 16px;
+}
+
 /* Make Mapbox popup close (×) more visible */
 .mapboxgl-popup-close-button {
   color: #e53935 !important;
