@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./Authcontext";
 import Home from "../pages/Home";
 import Register from "../pages/Register";
@@ -16,6 +16,8 @@ function App() {
           <Route path="/myaccount" element={<Myaccount />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          {/* Catch-all: redirect unknown routes (including /index.html) to home */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

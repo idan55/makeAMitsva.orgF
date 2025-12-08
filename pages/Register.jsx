@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../src/Authcontext";
 import { normalizeIsraeliPhone } from "../src/phoneUtils";
 
+const API_BASE =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL_ENV) ||
+  (typeof process !== "undefined" && process.env?.API_URL_ENV) ||
+  "http://localhost:4000/api";
+
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -71,6 +76,16 @@ function Register() {
       reader.readAsDataURL(file);
     });
 
+  const compressImageAdaptive = async (file) => {
+    // First pass: moderate compression
+    let candidate = file.size > 2 * 1024 * 1024 ? await compressImage(file, 1200, 0.7) : file;
+    // Second pass if still large
+    if (candidate.size > 2 * 1024 * 1024) {
+      candidate = await compressImage(candidate, 900, 0.55);
+    }
+    return candidate;
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -78,21 +93,22 @@ function Register() {
     console.log("📤 File selected:", file.name); // ✅ Debug
     setIsUploading(true);
     try {
-      const workingFile =
-        file.size > 5 * 1024 * 1024 ? await compressImage(file) : file;
-
+      const workingFile = await compressImageAdaptive(file);
       const formData = new FormData();
       formData.append("image", workingFile);
       console.log("📤 Sending to /api/upload..."); // ✅ Debug
       
-      const res = await fetch("http://localhost:4000/api/upload", {
+      const res = await fetch(`${API_BASE}/upload`, {
         method: "POST",
         body: formData,
       });
       
       console.log("📥 Response status:", res.status); // ✅ Debug
       
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || "Upload failed");
+      }
       
       const data = await res.json();
       console.log("✅ Cloudinary URL received:", data.url); // ✅ Debug
@@ -103,7 +119,7 @@ function Register() {
       setFeedback({ type: "success", text: "Image uploaded successfully ✅" });
     } catch (err) {
       console.error("❌ Upload error:", err);
-      setFeedback({ type: "error", text: "Error uploading image" });
+      setFeedback({ type: "error", text: err.message || "Error uploading image" });
     } finally {
       setIsUploading(false);
     }

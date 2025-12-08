@@ -17,6 +17,11 @@ import {
   listMyChats,
 } from "../src/Api";
 
+const API_BASE =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL_ENV) ||
+  (typeof process !== "undefined" && process.env?.API_URL_ENV) ||
+  "http://localhost:4000/api";
+
 function Myaccount() {
   const { user, login, logout } = useAuth();
   const navigate = useNavigate();
@@ -123,7 +128,7 @@ function Myaccount() {
       // Step 1: upload to backend (Cloudinary)
       const formData = new FormData();
       formData.append("image", file);
-      const uploadRes = await fetch("http://localhost:4000/api/upload", {
+      const uploadRes = await fetch(`${API_BASE}/upload`, {
         method: "POST",
         body: formData,
       });
