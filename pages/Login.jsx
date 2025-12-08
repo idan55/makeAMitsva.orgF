@@ -90,7 +90,7 @@ function Login() {
           />
 
           <button type="submit" className="submit-button" disabled={loading}>
-            {loading ? "Connexion..." : "Login"}
+            {loading ? "Connecting..." : "Login"}
           </button>
         </form>
       </div>
