@@ -37,6 +37,10 @@ VITE_API_URL_ENV=http://localhost:4000/api
 VITE_MAPBOX_TOKEN=your_mapbox_token
 ```
 
+Deploying on Render (or any static host) with client-side routing:
+- Keep `public/_redirects` (`/* /index.html 200`) so refresh/deep links work.
+- Set `VITE_API_URL_ENV` to your deployed backend URL (e.g., Render Web Service `/api`).
+
 ## Project Structure (high level)
 - `src/Api.js` – API calls to backend
 - `src/Authcontext.jsx` – auth provider, token/user persistence, revalidation
