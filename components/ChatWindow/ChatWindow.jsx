@@ -1,8 +1,7 @@
 // components/ChatWindow/ChatWindow.jsx
 import React, { useEffect, useRef, useState } from "react";
 import "./ChatWindow.css";
-
-const API_URL = "http://localhost:4000/api";
+import { API_URL } from "../../src/Api";
 
 function ChatWindow({
   chatId,
@@ -19,6 +18,7 @@ function ChatWindow({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [attachments, setAttachments] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [previewAttachment, setPreviewAttachment] = useState(null);
   const messagesEndRef = useRef(null);
@@ -115,7 +115,8 @@ function ChatWindow({
   // Envoyer un message
   async function handleSend(e) {
     e.preventDefault();
-    if (!text.trim() || isReadOnly) return;
+    const textToSend = text.trim();
+    if ((attachments.length === 0 && !textToSend) || isReadOnly) return;
 
     try {
       setSending(true);
@@ -144,11 +145,47 @@ function ChatWindow({
       }
 
       setText("");
+      setAttachments([]);
     } catch (err) {
       console.error("Error sending message:", err);
       alert("Error sending message");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file || !chatId) return;
+    setUploading(true);
+
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(`${API_URL}/chats/${chatId}/attachments`, {
+        method: "POST",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("Upload failed:", data);
+        alert(data.error || "Upload failed");
+        return;
+      }
+
+      setAttachments((prev) => [...prev, data]);
+    } catch (err) {
+      console.error("Error uploading file:", err);
+      alert("Error uploading file");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
     }
   }
 
