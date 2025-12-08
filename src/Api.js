@@ -1,6 +1,6 @@
 // src/Api.js
 // API base is driven by env var. Use Vite's import.meta for frontend and fallback to process.env for tooling.
-const API_URL =
+export const API_URL =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL_ENV) ||
   (typeof process !== "undefined" && process.env?.VITE_API_URL_ENV) ||
   "http://localhost:4000/api";
