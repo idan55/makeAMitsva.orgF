@@ -126,11 +126,19 @@ function Admin() {
           <h2>Users</h2>
           <div style={{ display: "grid", gap: "10px" }}>
             {users.map((u) => (
-              <div key={u._id} style={{ padding: "10px", border: "1px solid #ddd", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div><strong>{u.name}</strong> ({u.email})</div>
-                  <div style={{ fontSize: "12px", color: "#555" }}>
-                    Role: {u.role} · {u.isBanned ? "BANNED — contact support to unban: makeamitsva@gmail.com" : "Active"}
+              <div key={u._id} style={{ padding: "10px", border: "1px solid #ddd", borderRadius: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <img
+                    src={u.profileImage || "/logo.png"}
+                    alt={u.name}
+                    style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", background: "#f3f4f6" }}
+                    onError={(e) => (e.target.src = "/logo.png")}
+                  />
+                  <div>
+                    <div><strong>{u.name}</strong> ({u.email})</div>
+                    <div style={{ fontSize: "12px", color: "#555" }}>
+                      Role: {u.role} · {u.isBanned ? "BANNED — contact support to unban: makeamitsva@gmail.com" : "Active"}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>

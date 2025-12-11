@@ -22,10 +22,13 @@ function ChatWindow({
   const [expanded, setExpanded] = useState(false);
   const [previewAttachment, setPreviewAttachment] = useState(null);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
   const lastOtherMessageRef = useRef(null);
   const initialLoadRef = useRef(true);
 
   const currentUserId = currentUser?._id || currentUser?.id;
+  const otherUserAvatar = otherUser?.profileImage || "/logo.png";
+  const currentUserAvatar = currentUser?.profileImage || "/logo.png";
 
   // Demande la permission de notification au chargement
   useEffect(() => {
@@ -38,6 +41,11 @@ function ChatWindow({
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+
+    // keep the input focused to avoid losing the cursor on refresh/poll
+    if (inputRef.current && document.activeElement !== inputRef.current) {
+      inputRef.current.focus();
     }
   }, [messages]);
 
@@ -146,6 +154,7 @@ function ChatWindow({
 
       setText("");
       setAttachments([]);
+      if (inputRef.current) inputRef.current.focus();
     } catch (err) {
       console.error("Error sending message:", err);
       alert("Error sending message");
@@ -180,6 +189,7 @@ function ChatWindow({
       }
 
       setAttachments((prev) => [...prev, data]);
+      if (inputRef.current) inputRef.current.focus();
     } catch (err) {
       console.error("Error uploading file:", err);
       alert("Error uploading file");
@@ -232,12 +242,22 @@ function ChatWindow({
     >
       <div className="chat-header">
         <div className="chat-title">
-          {requestTitle && (
-            <div style={{ fontWeight: "bold", fontSize: "13px" }}>
-              Chat about: {requestTitle}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <img
+              src={otherUserAvatar}
+              alt={otherUserName}
+              style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", background: "#fff" }}
+              onError={(e) => (e.target.src = "/logo.png")}
+            />
+            <div>
+              {requestTitle && (
+                <div style={{ fontWeight: "bold", fontSize: "13px" }}>
+                  Chat about: {requestTitle}
+                </div>
+              )}
+              <div style={{ fontSize: "12px" }}>With {otherUserName}</div>
             </div>
-          )}
-          <div style={{ fontSize: "12px" }}>With {otherUserName}</div>
+          </div>
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <button
@@ -262,12 +282,19 @@ function ChatWindow({
           const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id;
           const isMine = senderId && senderId === currentUserId;
           const senderName = isMine ? "You" : otherUserName;
+          const avatarSrc = isMine ? currentUserAvatar : otherUserAvatar;
 
           return (
             <div
               key={msg._id || index}
               className={`chat-message ${isMine ? "mine" : "theirs"}`}
             >
+              <img
+                src={avatarSrc}
+                alt={senderName}
+                className="chat-avatar"
+                onError={(e) => (e.target.src = "/logo.png")}
+              />
               <div className="chat-bubble">
                 {msg.text && <div className="chat-text">{msg.text}</div>}
                 {Array.isArray(msg.attachments) && msg.attachments.length > 0 && (
@@ -325,6 +352,7 @@ function ChatWindow({
               value={text}
               onChange={(e) => setText(e.target.value)}
               disabled={sending}
+              ref={inputRef}
             />
             <label className="chat-attach">
               📎
@@ -334,7 +362,28 @@ function ChatWindow({
               {sending ? "..." : "Send"}
             </button>
           </form>
-          {uploading && <div className="chat-info">Uploading…</div>}
+          {(uploading || attachments.length > 0) && (
+            <div className="chat-info" style={{ marginBottom: "6px" }}>
+              {uploading ? "Uploading…" : "Attached"}
+              {attachments.length > 0 && (
+                <div className="chat-attachments" style={{ justifyContent: "center" }}>
+                  {attachments.map((att, idx) => (
+                    <div key={idx} className="chat-attachment">
+                      {att.type === "image" ? (
+                        <img src={att.url} alt={att.originalName || "attachment"} />
+                      ) : att.type === "video" ? (
+                        <video src={att.url} controls />
+                      ) : (
+                        <a href={att.url} target="_blank" rel="noreferrer">
+                          {att.originalName || "File"}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
       {previewAttachment && (
