@@ -282,7 +282,9 @@ function ChatWindow({
           const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender?._id;
           const isMine = senderId && senderId === currentUserId;
           const senderName = isMine ? "You" : otherUserName;
-          const avatarSrc = isMine ? currentUserAvatar : otherUserAvatar;
+          const avatarSrc = isMine
+            ? currentUserAvatar
+            : (typeof msg.sender === "object" && msg.sender?.profileImage) || otherUserAvatar;
 
           return (
             <div
