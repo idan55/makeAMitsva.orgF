@@ -1,13 +1,14 @@
 // components/ChatWindow/ChatWindow.jsx
 import React, { useEffect, useRef, useState } from "react";
 import "./ChatWindow.css";
-import { API_URL } from "../../src/Api";
+import { API_URL, completeRequest } from "../../src/Api";
 
 function ChatWindow({
   chatId,
   currentUser,
   otherUser,
   requestTitle,
+  requestId,
   isReadOnly,
   onClose,
   onNewMessage,
@@ -21,10 +22,13 @@ function ChatWindow({
   const [attachments, setAttachments] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [previewAttachment, setPreviewAttachment] = useState(null);
+  const [previewAvatar, setPreviewAvatar] = useState(null);
+  const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const lastOtherMessageRef = useRef(null);
   const initialLoadRef = useRef(true);
+  const completionTimerRef = useRef(null);
 
   const currentUserId = currentUser?._id || currentUser?.id;
   const otherUserAvatar = otherUser?.profileImage || "/logo.png";
@@ -36,6 +40,26 @@ function ChatWindow({
       Notification.requestPermission();
     }
   }, []);
+
+  // schedule completion prompt 4h after opening this chatId
+  useEffect(() => {
+    setShowCompletionPrompt(false);
+    if (completionTimerRef.current) {
+      clearTimeout(completionTimerRef.current);
+      completionTimerRef.current = null;
+    }
+    if (chatId) {
+      completionTimerRef.current = setTimeout(() => {
+        setShowCompletionPrompt(true);
+      }, 4 * 60 * 60 * 1000);
+    }
+    return () => {
+      if (completionTimerRef.current) {
+        clearTimeout(completionTimerRef.current);
+        completionTimerRef.current = null;
+      }
+    };
+  }, [chatId]);
 
   // Scroll automatique
   useEffect(() => {
@@ -246,8 +270,9 @@ function ChatWindow({
             <img
               src={otherUserAvatar}
               alt={otherUserName}
-              style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", background: "#fff" }}
+              style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover", background: "#fff", cursor: "zoom-in" }}
               onError={(e) => (e.target.src = "/logo.png")}
+              onDoubleClick={() => setPreviewAvatar(otherUserAvatar)}
             />
             <div>
               {requestTitle && (
@@ -296,6 +321,7 @@ function ChatWindow({
                 alt={senderName}
                 className="chat-avatar"
                 onError={(e) => (e.target.src = "/logo.png")}
+                onDoubleClick={() => setPreviewAvatar(avatarSrc)}
               />
               <div className="chat-bubble">
                 {msg.text && <div className="chat-text">{msg.text}</div>}
@@ -388,9 +414,35 @@ function ChatWindow({
           )}
         </>
       )}
-      {previewAttachment && (
-        <div className="chat-preview-overlay" onClick={() => setPreviewAttachment(null)}>
-          <img src={previewAttachment} alt="preview" />
+      {(previewAttachment || previewAvatar) && (
+        <div className="chat-preview-overlay" onClick={() => { setPreviewAttachment(null); setPreviewAvatar(null); }}>
+          <img src={previewAttachment || previewAvatar} alt="preview" />
+        </div>
+      )}
+
+      {showCompletionPrompt && requestId && (
+        <div className="chat-reminder">
+          <div>Has this request been solved? If yes, mark it as completed.</div>
+          <div className="chat-reminder-actions">
+            <button
+              type="button"
+              onClick={async () => {
+                const token = localStorage.getItem("token");
+                try {
+                  await completeRequest(requestId, token);
+                } catch (err) {
+                  console.warn("Failed to mark complete from reminder:", err);
+                } finally {
+                  setShowCompletionPrompt(false);
+                }
+              }}
+            >
+              Mark as solved
+            </button>
+            <button type="button" onClick={() => setShowCompletionPrompt(false)}>
+              Keep it open
+            </button>
+          </div>
         </div>
       )}
     </div>

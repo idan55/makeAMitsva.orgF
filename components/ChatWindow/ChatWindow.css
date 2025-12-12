@@ -202,10 +202,47 @@
     cursor: zoom-out;
   }
 
-  .chat-preview-overlay img {
-    max-width: 90vw;
-    max-height: 90vh;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-  }
+.chat-preview-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.chat-reminder {
+  position: absolute;
+  bottom: 70px;
+  left: 12px;
+  right: 12px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  color: #7c2d12;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+.chat-reminder-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chat-reminder button {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.chat-reminder button:first-of-type {
+  background: #22c55e;
+  color: #fff;
+}
+
+.chat-reminder button:last-of-type {
+  background: #e5e7eb;
+  color: #111827;
+}
   

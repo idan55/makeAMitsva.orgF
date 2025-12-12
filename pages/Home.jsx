@@ -26,11 +26,21 @@ function Home() {
   const lastNotifiedRef = useRef({});
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [urgency, setUrgency] = useState("normal");
   const [selectedId, setSelectedId] = useState(null);
   const [banFlashActive, setBanFlashActive] = useState(false);
   const [showBanSupport, setShowBanSupport] = useState(false);
 
   const { user: currentUser, login } = useAuth();
+
+  const urgencyBadge = (level) => {
+    const map = {
+      high: { label: "High", color: "#dc2626", bg: "#fee2e2" },
+      normal: { label: "Normal", color: "#1d4ed8", bg: "#e0ecff" },
+      low: { label: "Low", color: "#15803d", bg: "#dcfce7" },
+    };
+    return map[level] || map.normal;
+  };
 
   const [activeChat, setActiveChat] = useState(null); // { chatId, otherUser, requestTitle }
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -95,6 +105,7 @@ function Home() {
         description,
         latitude: lat,
         longitude: lng,
+        urgency,
         token,
       }); // { message, request }
 
@@ -108,6 +119,7 @@ function Home() {
       setRequests((prev) => [...prev, data.request]);
       setTitle("");
       setDescription("");
+      setUrgency("normal");
       setSuccess(data.message || "Request successfully created ✅");
     } catch (err) {
       console.error("Error creating request:", err);
@@ -566,6 +578,18 @@ function Home() {
               minHeight: "80px",
             }}
           />
+          <div style={{ display: "flex", gap: "10px", marginBottom: "10px", alignItems: "center" }}>
+            <label style={{ fontWeight: "600" }}>Urgency:</label>
+            <select
+              value={urgency}
+              onChange={(e) => setUrgency(e.target.value)}
+              style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
+            >
+              <option value="low">Low</option>
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+            </select>
+          </div>
           <button
             type="submit"
             style={{
@@ -665,6 +689,26 @@ function Home() {
                       }}
                     >
                       <strong>{req.title}</strong>
+                      <div style={{ marginTop: "6px" }}>
+                        {(() => {
+                          const badge = urgencyBadge(req.urgency);
+                          return (
+                            <span
+                              style={{
+                                display: "inline-block",
+                                padding: "4px 8px",
+                                borderRadius: "999px",
+                                background: badge.bg,
+                                color: badge.color,
+                                fontSize: "12px",
+                                fontWeight: "600",
+                              }}
+                            >
+                              {badge.label} urgency
+                            </span>
+                          );
+                        })()}
+                      </div>
                       <div
                         style={{
                           fontSize: "14px",
@@ -805,6 +849,7 @@ function Home() {
           currentUser={currentUser}
           otherUser={activeChat.otherUser}
           requestTitle={activeChat.requestTitle}
+          requestId={activeChat.requestId}
           visible={isChatOpen}
           onNewMessage={({ from, requestTitle, messageId }) => {
             // If this chat is open, mark as seen and don't show notification

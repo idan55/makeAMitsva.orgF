@@ -155,6 +155,7 @@ export async function createRequest({
   description,
   latitude,
   longitude,
+  urgency = "normal",
   token,
 }) {
   const res = await fetch(`${API_URL}/requests`, {
@@ -163,7 +164,7 @@ export async function createRequest({
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ title, description, latitude, longitude }),
+    body: JSON.stringify({ title, description, latitude, longitude, urgency }),
   });
 
   const data = await res.json();

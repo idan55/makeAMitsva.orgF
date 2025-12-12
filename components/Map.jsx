@@ -67,16 +67,18 @@ function Map({ userPos, requests, selectedId, onSelectRequest }) {
       if (!req.location || !req.location.coordinates) return;
 
       const [lng, lat] = req.location.coordinates;
+      const urgencyColor = req.urgency === "high" ? "#dc2626" : req.urgency === "low" ? "#16a34a" : "red";
 
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
         <div style="padding: 5px;">
           <strong>${req.title}</strong><br/>
           Age: ${req.createdBy?.age ?? "N/A"}<br/>
-          Posted: ${new Date(req.createdAt).toLocaleString()}
+          Posted: ${new Date(req.createdAt).toLocaleString()}<br/>
+          <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
         </div>
       `);
 
-      const marker = new mapboxgl.Marker({ color: "red" })
+      const marker = new mapboxgl.Marker({ color: urgencyColor })
         .setLngLat([lng, lat])
         .setPopup(popup)
         .addTo(map.current);

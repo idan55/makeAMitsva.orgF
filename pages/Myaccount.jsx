@@ -220,6 +220,7 @@ function Myaccount() {
             chatId: existing.id,
             otherUser: other,
             requestTitle: existing.requestTitle,
+            requestId: existing.requestId,
             isReadOnly: true,
           });
           setIsChatOpen(true);
@@ -250,6 +251,7 @@ function Myaccount() {
         chatId: data.chatId,
         otherUser: otherUserObj,
         requestTitle: request.title,
+        requestId: request._id,
         isReadOnly: true,
       });
       setIsChatOpen(true);
@@ -551,6 +553,7 @@ function Myaccount() {
           currentUser={user}
           otherUser={activeChat.otherUser}
           requestTitle={activeChat.requestTitle}
+          requestId={activeChat.requestId}
           isReadOnly={activeChat.isReadOnly}
           onNewMessage={({ from, requestTitle }) =>
             setChatNotification(`You have a new message from ${from} about "${requestTitle || "a request"}"`)
