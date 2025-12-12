@@ -19,6 +19,7 @@ function ChatWindow({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const [previewAttachment, setPreviewAttachment] = useState(null);
@@ -190,6 +191,15 @@ function ChatWindow({
   async function handleFileChange(e) {
     const file = e.target.files?.[0];
     if (!file || !chatId) return;
+    setUploadError("");
+
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxSize) {
+      setUploadError("File too large. Max 100MB.");
+      e.target.value = "";
+      return;
+    }
+
     setUploading(true);
 
     try {
@@ -393,7 +403,7 @@ function ChatWindow({
           </form>
           {(uploading || attachments.length > 0) && (
             <div className="chat-info" style={{ marginBottom: "6px" }}>
-              {uploading ? "Uploading…" : "Attached"}
+              {uploading ? "Uploading…" : uploadError || "Attached"}
               {attachments.length > 0 && (
                 <div className="chat-attachments" style={{ justifyContent: "center" }}>
                   {attachments.map((att, idx) => (
@@ -411,6 +421,11 @@ function ChatWindow({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+          {!uploading && uploadError && (
+            <div className="chat-info" style={{ color: "#dc2626", marginBottom: "6px" }}>
+              {uploadError}
             </div>
           )}
         </>
