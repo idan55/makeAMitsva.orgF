@@ -373,20 +373,21 @@ function ChatWindow({
         </div>
       ) : (
         <>
-          <form className="chat-input-area" onSubmit={handleSend}>
-            <input
-              type="text"
+      <form className="chat-input-area" onSubmit={handleSend}>
+            <textarea
+              rows={3}
               placeholder="Type a message…"
               value={text}
               onChange={(e) => setText(e.target.value)}
               disabled={sending}
               ref={inputRef}
+              className="chat-textarea"
             />
             <label className="chat-attach">
               📎
               <input type="file" accept="image/*,video/*" onChange={handleFileChange} disabled={uploading || sending} />
             </label>
-            <button type="submit" disabled={sending || !text.trim()}>
+            <button type="submit" disabled={sending || (!text.trim() && attachments.length === 0)}>
               {sending ? "..." : "Send"}
             </button>
           </form>
