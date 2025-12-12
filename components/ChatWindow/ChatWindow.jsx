@@ -195,7 +195,7 @@ function ChatWindow({
 
     const maxSize = 100 * 1024 * 1024; // 100MB
     if (file.size > maxSize) {
-      setUploadError("File too large. Max 100MB.");
+      setUploadError("File too large. Maximum 100MB.");
       e.target.value = "";
       return;
     }
