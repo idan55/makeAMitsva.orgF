@@ -249,8 +249,7 @@ form button[type="submit"]:disabled {
     flex-direction: row;
     align-items: center;
     gap: 8px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    flex-wrap: wrap;
     width: 100%;
   }
 
@@ -258,12 +257,16 @@ form button[type="submit"]:disabled {
     margin-right: 8px;
     display: inline-block;
     padding: 2px 0;
+    font-size: 0.85rem;
   }
 
   header button {
     width: auto;
     margin-top: 0;
     white-space: nowrap;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    margin-left: auto;
   }
 
   .map-container-style {
