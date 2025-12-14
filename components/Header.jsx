@@ -8,9 +8,26 @@ function Header() {
   const navigate = useNavigate();
 
   return (
-    <header style={{ display: "flex", alignItems: "center", gap: "12px", justifyContent: "space-between" }}>
+    <header
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        justifyContent: "space-between",
+      }}
+    >
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <NavLink to="/" style={{ display: "flex", alignItems: "center", gap: "10px", marginRight: "20px", textDecoration: "none", color: "inherit" }}>
+        <NavLink
+          to="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            marginRight: "20px",
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
           <img
             src="/logo.png"
             alt="Make A Mitsva logo"
@@ -19,7 +36,9 @@ function Header() {
           <h1 style={{ margin: 0 }}>Make A Mitsva</h1>
         </NavLink>
 
-        <NavLink to="/" style={{ marginRight: "12px" }}>Home</NavLink>
+        <NavLink to="/" style={{ marginRight: "12px" }}>
+          Home
+        </NavLink>
 
         {!user && (
           <>
@@ -38,7 +57,10 @@ function Header() {
               My Account
             </NavLink>
             {user.role === "admin" && (
-              <NavLink to="/admin" style={{ marginRight: "12px", color: "#e53935" }}>
+              <NavLink
+                to="/admin"
+                style={{ marginRight: "12px", color: "#e53935" }}
+              >
                 Admin
               </NavLink>
             )}
