@@ -1,10 +1,8 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { getMe } from "./Api";
 
-// ✅ Créer le contexte
 export const AuthContext = createContext();
 
-// ✅ Hook personnalisé pour utiliser le contexte
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -13,12 +11,10 @@ export const useAuth = () => {
   return context;
 };
 
-// ✅ Provider
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
 
-  // Charger user + token depuis localStorage au démarrage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
@@ -36,7 +32,6 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Always revalidate against backend to pick up state changes (e.g., ban/unban)
     const fetchFreshUser = async () => {
       if (!storedToken) return;
       try {
@@ -53,18 +48,15 @@ export const AuthProvider = ({ children }) => {
     fetchFreshUser();
   }, []);
 
-  // ✅ Fonction pour login
   const login = (userData) => {
     console.log("🔐 Login called with:", userData);
 
-    // userData = { user, token } venant du backend
     if (userData.user && userData.token) {
       setUser(userData.user);
       setToken(userData.token);
       localStorage.setItem("user", JSON.stringify(userData.user));
       localStorage.setItem("token", userData.token);
     } 
-    // Si on reçoit juste l'objet user
     else {
       setUser(userData);
       setToken(null);
@@ -72,7 +64,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Fonction pour logout
   const logout = () => {
     console.log("🚪 Logout called");
     setUser(null);

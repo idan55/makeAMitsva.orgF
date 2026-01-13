@@ -1,4 +1,4 @@
-/* ===== Global layout ===== */
+
 
 * {
   box-sizing: border-box;
@@ -29,7 +29,7 @@ body {
   width: 100%;
 }
 
-/* ===== Header / Footer ===== */
+
 
 header {
   background: #111827;
@@ -101,7 +101,7 @@ header a:hover {
   align-items: center;
 }
 
-/* ===== Main content ===== */
+
 
 .content {
   padding: 24px;
@@ -116,7 +116,7 @@ header a:hover {
   margin-bottom: 16px;
 }
 
-/* ===== Slider + form ===== */
+
 
 input[type="range"] {
   width: 220px;
@@ -179,7 +179,7 @@ form button[type="submit"]:disabled {
   cursor: not-allowed;
 }
 
-/* ===== Map + right panel ===== */
+
 
 .map-window-wrapper {
   display: flex;
@@ -187,13 +187,13 @@ form button[type="submit"]:disabled {
   margin-top: 20px;
 }
 
-/* left: map */
+
 .map-wrapper {
   flex: 2;
   min-height: 380px;
 }
 
-/* right: requests list */
+
 .window-wrapper {
   flex: 1.2;
   background: #ffffff;
@@ -204,7 +204,7 @@ form button[type="submit"]:disabled {
   flex-direction: column;
 }
 
-/* ===== Responsive tweaks ===== */
+
 @media (max-width: 900px) {
   header {
     flex-wrap: nowrap;
@@ -332,7 +332,7 @@ form button[type="submit"]:disabled {
   }
 }
 
-/* Prevent mobile zoom on inputs */
+
 input,
 textarea,
 button,
@@ -340,7 +340,7 @@ select {
   font-size: 16px;
 }
 
-/* Make Mapbox popup close (×) more visible */
+
 .mapboxgl-popup-close-button {
   color: #e53935 !important;
   font-size: 18px;
@@ -351,7 +351,7 @@ select {
   margin: 4px 0 8px 0;
 }
 
-/* scroll area */
+
 .request-list {
   margin-top: 4px;
   max-height: 340px;
@@ -359,7 +359,7 @@ select {
   padding-right: 4px;
 }
 
-/* ===== Individual request cards ===== */
+
 
 .request-item {
   border-radius: 8px;
@@ -400,13 +400,13 @@ select {
   color: #374151;
 }
 
-/* chat button inside expanded card */
+
 .request-item button {
   font-size: 0.85rem;
   padding: 6px 14px;
 }
 
-/* ===== Map container ===== */
+
 
 .map-container-style {
   width: 100%;
@@ -422,7 +422,7 @@ select {
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.15);
 }
 
-/* ===== Responsive ===== */
+
 
 @media (max-width: 900px) {
   .map-window-wrapper {

@@ -68,7 +68,6 @@ function Admin() {
           )
         );
       }
-      // Always refetch to mirror backend truth (covers cases where response is sparse)
       const usersData = await adminGetUsers(freshToken);
       setUsers(usersData);
     } catch (err) {
@@ -90,11 +89,9 @@ function Admin() {
           )
         );
       }
-      // Always refetch to ensure we mirror the backend state
       const usersData = await adminGetUsers(freshToken);
       setUsers(usersData);
     } catch (err) {
-      // Fallback: if backend didn't return user, toggle locally for UX
       setUsers((prev) =>
         prev.map((u) =>
           u._id === id || u.id === id ? { ...u, isBanned: false } : u

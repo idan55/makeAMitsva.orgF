@@ -25,10 +25,8 @@ function Login() {
 
     try {
       const data = await LoginUser({ email, password });
-      // data = { message, token, user }
-      login(data);          // pass the whole data object
-      navigate("/");        // go directly to home page
-      // setMessage("Utilisateur connecté"); // optional, not needed if we navigate
+      login(data);
+      navigate("/");
     } catch (err) {
       const msg = (err?.message || "").toLowerCase();
       const status = err?.status;

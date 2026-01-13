@@ -19,7 +19,7 @@ function Home() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState("");
 
-  const [userPos, setUserPos] = useState(null); // [lat, lng]
+  const [userPos, setUserPos] = useState(null);
   const [radiusKm, setRadiusKm] = useState(5);
   const [requests, setRequests] = useState([]);
   const [chatSummaries, setChatSummaries] = useState([]);
@@ -42,7 +42,7 @@ function Home() {
     return map[level] || map.normal;
   };
 
-  const [activeChat, setActiveChat] = useState(null); // { chatId, otherUser, requestTitle }
+  const [activeChat, setActiveChat] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatNotification, setChatNotification] = useState("");
   const pollingRef = useRef(null);
@@ -57,9 +57,8 @@ function Home() {
     }
   };
 
-  const itemRefs = useRef({}); // refs for scrolling to a request
+  const itemRefs = useRef({});
 
-  // Refresh user from backend to catch ban/unban without reload
   const refreshUserFromServer = async (token) => {
     try {
       const fresh = await getMe(token);
@@ -74,7 +73,6 @@ function Home() {
     }
   };
 
-  // Create a request
   async function handleCreateRequest(e) {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -107,9 +105,8 @@ function Home() {
         longitude: lng,
         urgency,
         token,
-      }); // { message, request }
+      });
 
-      // If backend now flags banned mid-flight, stop and show message
       const updatedBanState = data?.user?.isBanned ?? data?.isBanned ?? freshUser?.isBanned;
       if (updatedBanState) {
         setError("Your account is banned. Please contact support to unban: makeamitsva@gmail.com");
@@ -128,7 +125,6 @@ function Home() {
     }
   }
 
-  // Helper: "I want to help"
   async function handleWantToHelp(requestId, e) {
     e.stopPropagation();
     const token = localStorage.getItem("token");
@@ -162,7 +158,6 @@ function Home() {
     }
   }
 
-  // Creator: "Mark as completed"
   async function handleMarkCompleted(requestId, e) {
     e.stopPropagation();
     const token = localStorage.getItem("token");
@@ -183,9 +178,7 @@ function Home() {
     }
   }
 
-  // Get user’s location
   useEffect(() => {
-    // load seen notifications from localStorage
     try {
       const stored = localStorage.getItem("lastNotifiedChatMsg");
       if (stored) lastNotifiedRef.current = JSON.parse(stored);
@@ -204,7 +197,6 @@ function Home() {
     );
   }, []);
 
-  // Fetch nearby requests on location/radius/user-age change and poll to reduce manual refresh
   useEffect(() => {
     let timer;
 
@@ -236,10 +228,8 @@ function Home() {
     return () => {
       if (timer) clearInterval(timer);
     };
-    // include currentUser?.age so age changes show up immediately on request cards
   }, [userPos, radiusKm, currentUser?.age]);
 
-  // Trigger banned popup sequence
   useEffect(() => {
     let timer;
     if (currentUser?.isBanned) {
@@ -256,7 +246,6 @@ function Home() {
     return () => timer && clearTimeout(timer);
   }, [currentUser?.isBanned]);
 
-  // Poll chats list for notifications even when chat not opened
   useEffect(() => {
     let timer;
     async function loadChats() {
@@ -266,7 +255,6 @@ function Home() {
         const chats = await listMyChats(token);
         setChatSummaries(chats || []);
 
-        // On first load, just record last messages to avoid retroactive notifications
         if (!loadedNotifications.current) {
           chats.forEach((c) => {
             const last = c.lastMessage;
@@ -280,14 +268,12 @@ function Home() {
           return;
         }
 
-        // Determine latest incoming message per chat after initial load
         const currentUserId = currentUser?.id || currentUser?._id;
         for (const c of chats) {
           const last = c.lastMessage;
           if (!last) continue;
           const senderId = typeof last.sender === "string" ? last.sender : last.sender?._id;
           if (!senderId || senderId === currentUserId) {
-            // mark as seen so we don't re-notify on our own last message
             const lastId = last._id || last.createdAt;
             if (lastId) {
               lastNotifiedRef.current[c.id] = lastId;
@@ -299,7 +285,6 @@ function Home() {
           const lastId = last._id || last.createdAt;
           if (!title || !lastId) continue;
 
-          // If chat is currently open, mark as seen and skip notification
           if (activeChat?.chatId === c.id && isChatOpen) {
             lastNotifiedRef.current[c.id] = lastId;
             localStorage.setItem("lastNotifiedChatMsg", JSON.stringify(lastNotifiedRef.current));
@@ -309,7 +294,7 @@ function Home() {
             continue;
           }
 
-          if (lastNotifiedRef.current[c.id] === lastId) continue; // already notified
+          if (lastNotifiedRef.current[c.id] === lastId) continue;
 
           const otherUser = (c.participants || []).find(
             (p) => (p._id || p.id) && (p._id || p.id) !== currentUserId
@@ -326,7 +311,7 @@ function Home() {
           });
           lastNotifiedRef.current[c.id] = lastId;
           localStorage.setItem("lastNotifiedChatMsg", JSON.stringify(lastNotifiedRef.current));
-          break; // show one at a time
+          break;
         }
       } catch (err) {
         console.error("load chats error", err);
@@ -338,19 +323,16 @@ function Home() {
     return () => timer && clearInterval(timer);
   }, [currentUser]);
 
-  // When opening/closing chats, mark last message as seen to avoid stale notifications
   useEffect(() => {
     if (activeChat && isChatOpen) {
       markChatSeen(activeChat.chatId);
     }
   }, [activeChat, isChatOpen, chatSummaries]);
 
-  // Select request from map or list
   function handleSelectRequest(id) {
     setSelectedId((prev) => (prev === id ? null : id));
   }
 
-  // Auto-scroll to selected card when selectedId changes
   useEffect(() => {
     if (!selectedId) return;
 
@@ -360,7 +342,6 @@ function Home() {
     }
   }, [selectedId]);
 
-  // Open chat for a request
   const handleOpenChat = async (request) => {
 
     try {
@@ -371,24 +352,20 @@ function Home() {
       }
 
       const currentUserId = currentUser?.id || currentUser?._id;
-      const creatorId = request.createdBy?._id || request.createdBy; // works for populated or ObjectId
+      const creatorId = request.createdBy?._id || request.createdBy;
       const helperId = request.completedBy?._id || request.completedBy || null;
 
       let otherUserId;
 
       if (currentUserId === creatorId && helperId) {
-        // I am the creator, chat with the helper
         otherUserId = helperId;
       } else if (currentUserId === helperId) {
-        // I am the helper, chat with the creator
         otherUserId = creatorId;
       } else {
-        // I am just viewing / not creator or helper – chat with creator
         otherUserId = creatorId;
       }
 
       if (!otherUserId) {
-        // fallback to participants from summaries (deleted users)
         const summary = chatSummaries.find((c) => c.requestId === request._id);
         if (summary) {
           const other = (summary.participants || []).find(
@@ -419,7 +396,6 @@ function Home() {
         token,
       });
 
-      // Decide which user object to show as "otherUser" in UI
       let otherUserObj = request.createdBy;
       if (currentUserId === creatorId && request.completedBy) {
         otherUserObj = request.completedBy;
@@ -440,7 +416,6 @@ function Home() {
         requestTitle: request.title,
         requestId: request._id,
       });
-      // mark last message as seen if we have a summary
       markChatSeen(data.chatId);
       setChatNotification("");
       setIsChatOpen(true);
@@ -523,7 +498,6 @@ function Home() {
           </div>
         )}
 
-        {/* Radius slider */}
         <div style={{ marginBottom: "20px" }}>
           <label>
             Distance: {radiusKm} km
@@ -545,7 +519,6 @@ function Home() {
           </button>
         </div>
 
-        {/* Create request */}
         <form onSubmit={handleCreateRequest} style={{ marginBottom: "20px" }}>
           <h3>Add a new request</h3>
           <input
@@ -606,7 +579,6 @@ function Home() {
           </button>
         </form>
 
-        {/* Feedback messages */}
         {success && (
           <p style={{ color: "green", marginTop: "10px", fontWeight: "bold" }}>
             {success}
@@ -619,7 +591,6 @@ function Home() {
         )}
         {loading && <p>Loading nearby mitzvot...</p>}
 
-        {/* Map + scroll list */}
         {userPos && (
           <div
             className="map-window-wrapper"
@@ -629,7 +600,6 @@ function Home() {
               marginTop: "20px",
             }}
           >
-            {/* MAP */}
             <div className="map-wrapper" style={{ flex: "1 1 60%" }}>
               <Map
                 userPos={userPos}
@@ -639,7 +609,6 @@ function Home() {
               />
             </div>
 
-            {/* SCROLL LIST */}
             <div className="window-wrapper" style={{ flex: "1 1 40%" }}>
               <h3>Nearest requests</h3>
               <div
@@ -665,8 +634,8 @@ function Home() {
                   const isOwner = currentUserId && creatorId === currentUserId;
                   const isHelper = currentUserId && helperId === currentUserId;
                   const canChat =
-                    (isOwner && helperId) || // creator can chat only if helper exists
-                    (isHelper && creatorId);  // helper can chat only if creator exists
+                    (isOwner && helperId) ||
+                    (isHelper && creatorId);
 
                   return (
                     <div
@@ -744,7 +713,6 @@ function Home() {
                           <hr />
                           <p>{req.description}</p>
 
-                          {/* Helper button: only for non-owners on open requests */}
                           {!isOwner && !req.isCompleted && (
                             <button
                               type="button"
@@ -754,7 +722,6 @@ function Home() {
                             </button>
                           )}
 
-                          {/* Owner button: only for creator on open requests */}
                           {isOwner && !req.isCompleted && (
                             <button
                               type="button"
@@ -764,7 +731,6 @@ function Home() {
                             </button>
                           )}
 
-                          {/* Open chat button */}
                           {canChat && (
                             <button
                               type="button"
@@ -797,12 +763,10 @@ function Home() {
         )}
       </div>
 
-      {/* Chat popup */}
       {chatNotification && (
         <div
           onClick={() => {
             if (chatNotification.chatId && chatNotification.requestId) {
-              // open chat directly using stored summary info
               const summary = chatSummaries.find((c) => c.id === chatNotification.chatId);
               if (summary) {
                 const currentUserId = currentUser?.id || currentUser?._id;
@@ -852,7 +816,6 @@ function Home() {
           requestId={activeChat.requestId}
           visible={isChatOpen}
           onNewMessage={({ from, requestTitle, messageId }) => {
-            // If this chat is open, mark as seen and don't show notification
             if (activeChat && isChatOpen) {
               if (messageId) {
                 lastNotifiedRef.current[activeChat.chatId] = messageId;

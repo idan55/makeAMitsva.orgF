@@ -31,7 +31,7 @@ function Myaccount() {
   const [myCompletedCreated, setMyCompletedCreated] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [imageError, setImageError] = useState(false); // ✅ Pour empêcher la boucle
+  const [imageError, setImageError] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadFeedback, setUploadFeedback] = useState("");
   const [chatNotification, setChatNotification] = useState("");
@@ -80,12 +80,11 @@ function Myaccount() {
       }
     }
 
-    loadData(true); // run immediately on mount AND whenever user/token changes
+    loadData(true);
     timer = setInterval(() => loadData(false), 8000);
     return () => {
       if (timer) clearInterval(timer);
     };
-    // Rerun when user changes so updated fields (like age) appear immediately.
   }, []);
 
   async function handleSolved(requestId) {
@@ -125,7 +124,6 @@ function Myaccount() {
     setIsUploading(true);
     setUploadFeedback("");
     try {
-      // Step 1: upload to backend (Cloudinary)
       const formData = new FormData();
       formData.append("image", file);
       const uploadRes = await fetch(`${API_BASE}/upload`, {
@@ -135,7 +133,6 @@ function Myaccount() {
       const uploadData = await uploadRes.json();
       if (!uploadRes.ok) throw new Error(uploadData.error || "Upload failed");
 
-      // Step 2: persist on user profile
       const updatedUser = await updateProfileImage({ profileImage: uploadData.url, token });
       login(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
@@ -208,7 +205,6 @@ function Myaccount() {
       }
 
       if (!otherUserId) {
-        // Try to find an existing chat for this request (e.g., deleted user)
         const chats = await listMyChats(token);
         const existing = chats.find((c) => c.requestId === request._id);
         if (existing) {

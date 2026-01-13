@@ -1,4 +1,3 @@
-// components/ChatWindow/ChatWindow.jsx
 import React, { useEffect, useRef, useState } from "react";
 import "./ChatWindow.css";
 import { API_URL, completeRequest } from "../../src/Api";
@@ -35,14 +34,12 @@ function ChatWindow({
   const otherUserAvatar = otherUser?.profileImage || "/logo.png";
   const currentUserAvatar = currentUser?.profileImage || "/logo.png";
 
-  // Demande la permission de notification au chargement
   useEffect(() => {
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
   }, []);
 
-  // schedule completion prompt 4h after opening this chatId
   useEffect(() => {
     setShowCompletionPrompt(false);
     if (completionTimerRef.current) {
@@ -62,19 +59,16 @@ function ChatWindow({
     };
   }, [chatId]);
 
-  // Scroll automatique
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
 
-    // keep the input focused to avoid losing the cursor on refresh/poll
     if (inputRef.current && document.activeElement !== inputRef.current) {
       inputRef.current.focus();
     }
   }, [messages]);
 
-  // Charger les messages + polling
   useEffect(() => {
     if (!chatId) return;
 
@@ -99,14 +93,12 @@ function ChatWindow({
         const msgs = Array.isArray(data.messages) ? data.messages : [];
         setMessages(msgs);
 
-        // On initial load, baseline the last message and skip notifications
         if (initial && msgs.length > 0) {
           const latest = msgs[msgs.length - 1];
           lastOtherMessageRef.current = latest._id || msgs.length;
           return;
         }
 
-        // Notification for new messages from others
         if (msgs.length > 0) {
           const latest = msgs[msgs.length - 1];
           const senderId =
@@ -145,7 +137,6 @@ function ChatWindow({
     return () => clearInterval(intervalId);
   }, [chatId]);
 
-  // Envoyer un message
   async function handleSend(e) {
     e.preventDefault();
     const textToSend = text.trim();
@@ -193,7 +184,7 @@ function ChatWindow({
     if (!file || !chatId) return;
     setUploadError("");
 
-    const maxSize = 100 * 1024 * 1024; // 100MB
+    const maxSize = 100 * 1024 * 1024;
     if (file.size > maxSize) {
       setUploadError("File too large. Maximum 100MB.");
       e.target.value = "";
@@ -233,7 +224,6 @@ function ChatWindow({
     }
   }
 
-  // Notifications pour nouveaux messages des autres
   useEffect(() => {
     if (!messages || messages.length === 0) return;
 
@@ -249,7 +239,6 @@ function ChatWindow({
     }
   }, [messages, currentUserId]);
 
-  // Déterminer le nom de l'autre utilisateur
   let otherUserName =
     otherUser?.name || otherUser?.firstname || otherUser?.email || "User";
 

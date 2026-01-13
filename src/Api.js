@@ -1,11 +1,7 @@
-// src/Api.js
-// API base is driven by env var. Use Vite's import.meta for frontend and fallback to process.env for tooling.
 export const API_URL =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL_ENV) ||
   (typeof process !== "undefined" && process.env?.VITE_API_URL_ENV) ||
   "http://localhost:4000/api";
-
-// ---------- USER API ----------
 
 export async function registerUser({
   name,
@@ -34,7 +30,7 @@ export async function registerUser({
     throw new Error(data.error || "Registration failed");
   }
 
-  return data; // { message, user }
+  return data;
 }
 
 export async function LoginUser({ email, password }) {
@@ -55,7 +51,7 @@ export async function LoginUser({ email, password }) {
     throw error;
   }
 
-  return data; // { message, token, user }
+  return data;
 }
 
 export async function getMe(token) {
@@ -68,7 +64,7 @@ export async function getMe(token) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to load user");
-  return data.user; // sanitized user
+  return data.user;
 }
 
 export async function updateProfileImage({ profileImage, token }) {
@@ -83,10 +79,8 @@ export async function updateProfileImage({ profileImage, token }) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to update profile image");
-  return data.user; // sanitized user
+  return data.user;
 }
-
-// ---------- ADMIN ----------
 
 export async function adminGetUsers(token) {
   const res = await fetch(`${API_URL}/admin/users`, {
@@ -104,7 +98,7 @@ export async function adminBanUser(id, token) {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to ban user");
-  return data.user || data.updatedUser || data.data || data; // accept any shape backend returns
+  return data.user || data.updatedUser || data.data || data;
 }
 
 export async function adminUnbanUser(id, token) {
@@ -136,7 +130,6 @@ export async function adminDeleteRequest(id, token) {
   return data;
 }
 
-// Delete own account
 export async function deleteMyAccount({ userId, token }) {
   const res = await fetch(`${API_URL}/users/delete/${userId}`, {
     method: "DELETE",
@@ -147,9 +140,6 @@ export async function deleteMyAccount({ userId, token }) {
   return data;
 }
 
-// ---------- REQUESTS API ----------
-
-// Create a new request (needs token)
 export async function createRequest({
   title,
   description,
@@ -169,10 +159,9 @@ export async function createRequest({
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to create request");
-  return data; // { message, request }
+  return data;
 }
 
-// Get nearby requests (PUBLIC)
 export async function getNearbyRequests({ latitude, longitude, distanceKm }) {
   const params = new URLSearchParams({
     latitude: String(latitude),
@@ -184,10 +173,9 @@ export async function getNearbyRequests({ latitude, longitude, distanceKm }) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch nearby requests");
-  return data; // { message, requests }
+  return data;
 }
 
-// "I want to help" (helper claims the request)
 export async function wantToHelpRequest(id, token) {
   const res = await fetch(`${API_URL}/requests/${id}/help`, {
     method: "PATCH",
@@ -199,10 +187,9 @@ export async function wantToHelpRequest(id, token) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to mark as helper");
-  return data; // { message, request }
+  return data;
 }
 
-// "Completed" (creator confirms completion)
 export async function completeRequest(id, token) {
   const res = await fetch(`${API_URL}/requests/${id}/complete`, {
     method: "PATCH",
@@ -214,10 +201,9 @@ export async function completeRequest(id, token) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to mark completed");
-  return data; // { message, request }
+  return data;
 }
 
-// My open requests (created by me, not completed)
 export async function getMyOpenRequests(token) {
   const res = await fetch(`${API_URL}/requests/my-open`, {
     method: "GET",
@@ -229,10 +215,9 @@ export async function getMyOpenRequests(token) {
   const data = await res.json();
   if (!res.ok)
     throw new Error(data.error || "Failed to fetch my open requests");
-  return data; // { message, requests }
+  return data;
 }
 
-// Requests I solved for others (completedBy = me, isCompleted = true)
 export async function getRequestsISolved(token) {
   const res = await fetch(`${API_URL}/requests/i-solved`, {
     method: "GET",
@@ -243,12 +228,9 @@ export async function getRequestsISolved(token) {
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch solved requests");
-  return data; // { message, requests }
+  return data;
 }
 
-// ---------- CHAT API ----------
-
-// Start or get a chat with another user
 export async function startChat({ otherUserId, requestId, token }) {
   const res = await fetch(`${API_URL}/chats/start`, {
     method: "POST",
@@ -264,7 +246,6 @@ export async function startChat({ otherUserId, requestId, token }) {
     throw new Error(data.error || "Failed to start chat");
   }
 
-  // data should be: { chatId, chat }
   return data;
 }
 
@@ -277,7 +258,6 @@ export async function listMyChats(token) {
   return data.chats;
 }
 
-// Requests I created that are completed
 export async function getMyCompletedRequests(token) {
   const res = await fetch(`${API_URL}/requests/my-completed`, {
     method: "GET",
@@ -289,5 +269,5 @@ export async function getMyCompletedRequests(token) {
   const data = await res.json();
   if (!res.ok)
     throw new Error(data.error || "Failed to fetch my completed requests");
-  return data; // { message, requests }
+  return data;
 }

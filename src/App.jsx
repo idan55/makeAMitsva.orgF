@@ -16,7 +16,6 @@ function App() {
           <Route path="/myaccount" element={<Myaccount />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
-          {/* Catch-all: redirect unknown routes (including /index.html) to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

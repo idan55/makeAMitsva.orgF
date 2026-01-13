@@ -17,7 +17,7 @@ function Register() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [age, setAge] = useState("");
-  const [profileImage, setProfileImage] = useState(""); 
+  const [profileImage, setProfileImage] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [error, setError] = useState("");
   const [phoneError, setPhoneError] = useState("");
@@ -26,7 +26,6 @@ function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  // Validation mot de passe
   const validatePassword = (value) => {
     if (value.length < 8) return "At least 8 characters.";
     if (!/[A-Z]/.test(value)) return "At least one uppercase letter.";
@@ -40,7 +39,6 @@ function Register() {
     setError(validatePassword(value));
   };
 
-  // Upload image
   const compressImage = (file, maxDim = 1200, quality = 0.7) =>
     new Promise((resolve, reject) => {
       const img = new Image();
@@ -77,9 +75,7 @@ function Register() {
     });
 
   const compressImageAdaptive = async (file) => {
-    // First pass: moderate compression
     let candidate = file.size > 2 * 1024 * 1024 ? await compressImage(file, 1200, 0.7) : file;
-    // Second pass if still large
     if (candidate.size > 2 * 1024 * 1024) {
       candidate = await compressImage(candidate, 900, 0.55);
     }
@@ -90,20 +86,20 @@ function Register() {
     const file = e.target.files[0];
     if (!file) return;
   
-    console.log("📤 File selected:", file.name); // ✅ Debug
+    console.log("📤 File selected:", file.name);
     setIsUploading(true);
     try {
       const workingFile = await compressImageAdaptive(file);
       const formData = new FormData();
       formData.append("image", workingFile);
-      console.log("📤 Sending to /api/upload..."); // ✅ Debug
+      console.log("📤 Sending to /api/upload...");
       
       const res = await fetch(`${API_BASE}/upload`, {
         method: "POST",
         body: formData,
       });
       
-      console.log("📥 Response status:", res.status); // ✅ Debug
+      console.log("📥 Response status:", res.status);
       
       if (!res.ok) {
         const errText = await res.text();
@@ -111,7 +107,7 @@ function Register() {
       }
       
       const data = await res.json();
-      console.log("✅ Cloudinary URL received:", data.url); // ✅ Debug
+      console.log("✅ Cloudinary URL received:", data.url);
       
       setProfileImage(data.url);
       console.log("🔹 profileImage juste après upload:", data.url);
@@ -173,17 +169,15 @@ function Register() {
         profileImage,
       };
   
-      // 🔹 Inscription + récupération token + user
       const registerResponse = await registerUser(userData);
       console.log("✅ Register response:", registerResponse);
 
-      // 🔹 Login automatique pour récupérer token + user
       const loginResponse = await LoginUser({ email, password });
       login(loginResponse);
 
-      setPhone(normalizedPhone); // reflect the normalized number in the form
+      setPhone(normalizedPhone);
       setFeedback({ type: "success", text: "Account created and logged in!" });
-      navigate("/"); // go straight to the map/home
+      navigate("/");
     } catch (err) {
       console.error("❌ Registration error:", err);
       setFeedback({ type: "error", text: err.message || "Registration failed" });
