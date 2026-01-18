@@ -4,7 +4,7 @@ import Footer from "../components/Footer";
 import { registerUser, LoginUser } from "../src/Api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../src/Authcontext";
-import { normalizeIsraeliPhone } from "../src/phoneUtils";
+import { normalizePhone } from "../src/phoneUtils";
 
 const API_BASE =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL_ENV) ||
@@ -130,11 +130,11 @@ function Register() {
       return;
     }
 
-    const normalized = normalizeIsraeliPhone(value);
+    const normalized = normalizePhone(value);
     setPhoneError(
       normalized
         ? ""
-        : "Please enter a valid Israeli mobile number (e.g. +9725XXXXXXXX)"
+        : "Please enter a valid phone number with country code (e.g. +1 415 555 0100)"
     );
   };
 
@@ -147,10 +147,10 @@ function Register() {
       return;
     }
 
-    const normalizedPhone = normalizeIsraeliPhone(phone);
+    const normalizedPhone = normalizePhone(phone);
     if (!normalizedPhone) {
-      setPhoneError("Please enter a valid Israeli mobile number.");
-      setFeedback({ type: "error", text: "Please enter a valid Israeli mobile number." });
+      setPhoneError("Please enter a valid phone number with country code.");
+      setFeedback({ type: "error", text: "Please enter a valid phone number with country code." });
       return;
     }
   
@@ -199,11 +199,11 @@ function Register() {
           {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
           <input
             type="tel"
-            placeholder="Phone (e.g. +9725XXXXXXXX)"
+            placeholder="Phone (e.g. +1 415 555 0100)"
             value={phone}
             onChange={handlePhoneChange}
             onBlur={() => {
-              const normalized = normalizeIsraeliPhone(phone);
+              const normalized = normalizePhone(phone);
               if (normalized) setPhone(normalized);
             }}
             required

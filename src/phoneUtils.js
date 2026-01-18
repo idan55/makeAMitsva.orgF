@@ -1,22 +1,21 @@
-export function normalizeIsraeliPhone(input) {
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+
+export function normalizePhone(input) {
   if (!input) return "";
 
-  let digits = String(input).replace(/\D/g, "");
+  const phoneNumber = parsePhoneNumberFromString(String(input));
+  if (!phoneNumber || !phoneNumber.isValid()) return "";
 
-  if (digits.startsWith("00")) digits = digits.slice(2);
-  if (digits.startsWith("972")) digits = digits.slice(3);
-  while (digits.startsWith("0")) digits = digits.slice(1);
-
-  if (/^5\d{8}$/.test(digits)) return "+972" + digits;
-
-  return "";
+  return phoneNumber.number;
 }
 
-export function isValidIsraeliPhone(input) {
-  return Boolean(normalizeIsraeliPhone(input));
+export function isValidPhone(input) {
+  return Boolean(normalizePhone(input));
 }
 
 export function formatPhoneForDisplay(input) {
-  const normalized = normalizeIsraeliPhone(input);
-  return normalized || input || "";
+  const phoneNumber = parsePhoneNumberFromString(String(input));
+  if (!phoneNumber || !phoneNumber.isValid()) return input || "";
+
+  return phoneNumber.formatInternational();
 }

@@ -633,6 +633,7 @@ function Home() {
 
                   const isOwner = currentUserId && creatorId === currentUserId;
                   const isHelper = currentUserId && helperId === currentUserId;
+                  const hasHelper = Boolean(helperId);
                   const canChat =
                     (isOwner && helperId) ||
                     (isHelper && creatorId);
@@ -713,7 +714,7 @@ function Home() {
                           <hr />
                           <p>{req.description}</p>
 
-                          {!isOwner && !req.isCompleted && (
+                          {!isOwner && !req.isCompleted && !hasHelper && (
                             <button
                               type="button"
                               onClick={(e) => handleWantToHelp(req._id, e)}

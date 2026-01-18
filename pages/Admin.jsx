@@ -134,7 +134,7 @@ function Admin() {
                   <div>
                     <div><strong>{u.name}</strong> ({u.email})</div>
                     <div style={{ fontSize: "12px", color: "#555" }}>
-                      Role: {u.role} · {u.isBanned ? "BANNED — contact support to unban: makeamitsva@gmail.com" : "Active"}
+                      Role: {u.role} · Flags: {u.flagsCount || 0} · {u.isBanned ? "BANNED — contact support to unban: makeamitsva@gmail.com" : "Active"}
                     </div>
                   </div>
                 </div>

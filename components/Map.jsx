@@ -108,7 +108,17 @@ function Map({ userPos, requests, selectedId, onSelectRequest }) {
 
     const marker = markers.current[selectedId];
     if (marker) {
+      const activeEl = document.activeElement;
       marker.togglePopup();
+      if (activeEl && typeof activeEl.focus === "function") {
+        const isEditable =
+          activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.isContentEditable;
+        if (isEditable) {
+          setTimeout(() => activeEl.focus(), 0);
+        }
+      }
     }
   }, [selectedId, requests]);
 

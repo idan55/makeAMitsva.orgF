@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./ChatWindow.css";
-import { API_URL, completeRequest } from "../../src/Api";
+import { API_URL, completeRequest, flagUserInChat } from "../../src/Api";
 
 function ChatWindow({
   chatId,
@@ -24,6 +24,9 @@ function ChatWindow({
   const [previewAttachment, setPreviewAttachment] = useState(null);
   const [previewAvatar, setPreviewAvatar] = useState(null);
   const [showCompletionPrompt, setShowCompletionPrompt] = useState(false);
+  const [flagging, setFlagging] = useState(false);
+  const [serverClosed, setServerClosed] = useState(false);
+  const [hasFlagged, setHasFlagged] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const lastOtherMessageRef = useRef(null);
@@ -33,6 +36,8 @@ function ChatWindow({
   const currentUserId = currentUser?._id || currentUser?.id;
   const otherUserAvatar = otherUser?.profileImage || "/logo.png";
   const currentUserAvatar = currentUser?.profileImage || "/logo.png";
+  const otherUserId = otherUser?._id || otherUser?.id;
+  const effectiveReadOnly = Boolean(isReadOnly || serverClosed);
 
   useEffect(() => {
     if ("Notification" in window && Notification.permission !== "granted") {
@@ -92,6 +97,8 @@ function ChatWindow({
 
         const msgs = Array.isArray(data.messages) ? data.messages : [];
         setMessages(msgs);
+        setServerClosed(Boolean(data.isClosed));
+        setHasFlagged(Boolean(data.hasFlagged));
 
         if (initial && msgs.length > 0) {
           const latest = msgs[msgs.length - 1];
@@ -140,7 +147,7 @@ function ChatWindow({
   async function handleSend(e) {
     e.preventDefault();
     const textToSend = text.trim();
-    if ((attachments.length === 0 && !textToSend) || isReadOnly) return;
+    if ((attachments.length === 0 && !textToSend) || effectiveReadOnly) return;
 
     try {
       setSending(true);
@@ -284,6 +291,35 @@ function ChatWindow({
           </div>
         </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          {!hasFlagged && (
+            <button
+              className="chat-toggle"
+              onClick={async () => {
+                if (!chatId || !otherUserId || flagging) return;
+                const ok = window.confirm("Flag this user? This will be reviewed by admins.");
+                if (!ok) return;
+                try {
+                  setFlagging(true);
+                  const token = localStorage.getItem("token");
+                  await flagUserInChat({
+                    chatId,
+                    targetUserId: otherUserId,
+                    token,
+                  });
+                  setHasFlagged(true);
+                  alert("User flagged. Thank you!");
+                } catch (err) {
+                  alert(err.message || "Failed to flag user");
+                } finally {
+                  setFlagging(false);
+                }
+              }}
+              title="Flag user"
+              disabled={!otherUserId || flagging}
+            >
+              {flagging ? "Flagging..." : "Flag"}
+            </button>
+          )}
           <button
             className="chat-toggle"
             onClick={() => setExpanded((v) => !v)}
@@ -364,10 +400,10 @@ function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {isReadOnly ? (
+      {effectiveReadOnly ? (
         <div className="chat-input-area" style={{ justifyContent: "center", color: "#666" }}>
           <div className="chat-info" style={{ fontSize: "12px" }}>
-            This mitzva is completed. Chat is read-only.
+            This chat is closed. Messages are read-only.
           </div>
         </div>
       ) : (

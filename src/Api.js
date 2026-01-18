@@ -258,6 +258,21 @@ export async function listMyChats(token) {
   return data.chats;
 }
 
+export async function flagUserInChat({ chatId, targetUserId, token }) {
+  const res = await fetch(`${API_URL}/chats/${chatId}/flag`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ targetUserId }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to flag user");
+  return data;
+}
+
 export async function getMyCompletedRequests(token) {
   const res = await fetch(`${API_URL}/requests/my-completed`, {
     method: "GET",
